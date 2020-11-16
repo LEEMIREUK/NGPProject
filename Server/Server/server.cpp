@@ -29,11 +29,6 @@ void error_display(const char* msg, int err_no)
 	LocalFree(lpMsgBuf);
 }
 
-void process_move(int id)
-{
-
-}
-
 void process_shoot(int id)
 {
 
