@@ -1,8 +1,13 @@
 #include <iostream>
+#include <WS2tcpip.h>
+#pragma comment (lib, "ws2_32") 
 #include "Player.h"
+#include "../../protocol.h"
 
 Player player;
 Inputs inputs;
+SOCKET cSocket;
+sockaddr_in sockAddr;
 int g_prevTimeInMillisecond = 0;
 
 void KeyDownInput(unsigned char key, int x, int y)
@@ -69,8 +74,8 @@ void display()
 	Inputs tempInputs;
 	memcpy(&tempInputs, &inputs, sizeof(Inputs));
 
-	player.DrawPlayer();
 	player.Move(elapsedTimeInSec, &tempInputs);
+	player.DrawPlayer();
 
 	glutSwapBuffers();
 }
@@ -85,6 +90,14 @@ int main(int argc, char** argv)
 {
 	//WSADATA WSAData;
 	//WSAStartup(MAKEWORD(2, 2), &WSAData);
+
+	//cSocket = socket(AF_INET, SOCK_STREAM, 0);
+	//sockAddr.sin_family = AF_INET;
+	//sockAddr.sin_port = htons(5959);
+	//sockAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	//connect(cSocket, (SOCKADDR*)&sockAddr, sizeof(sockAddr));
+	//u_long isnonBlock = 1;
+	//ioctlsocket(cSocket, FIONBIO, &isnonBlock);
 
 	// 초기화 함수들
 	glutInit(&argc, argv);

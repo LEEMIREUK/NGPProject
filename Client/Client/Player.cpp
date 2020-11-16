@@ -8,6 +8,8 @@ Player::Player()
 	m_Speed_Left = 0.f;
 	m_Speed_Down = 0.f;
 	m_Speed_Right = 0.f;
+	m_Speed_X = 0.f;
+	m_Speed_Y = 0.f;
 	m_Size = 0.1f;
 	m_PlayerID = NULL;
 }
