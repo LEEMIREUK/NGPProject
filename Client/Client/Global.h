@@ -3,7 +3,9 @@
 
 #define WIDTH 1200
 #define HEIGHT 800
-#define MOVESPEED 0.01f
+#define MOVESPEED 0.3
+#define BULLETSPEED 1
+#define BULLETCOUNT 5
 
 typedef struct Inputs
 {

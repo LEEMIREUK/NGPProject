@@ -1,10 +1,16 @@
 #include <WinSock2.h>
 #include <iostream>
 #include "Player.h"
+#include "Weapon.h"
+#include "Bullet.h"
 
 Player player;
+Weapon weapon;
+Bullet bullet[BULLETCOUNT];
 Inputs inputs;
 int g_prevTimeInMillisecond = 0;
+bool clicked = false;
+int shootcount = 0;
 
 void KeyDownInput(unsigned char key, int x, int y)
 {
@@ -46,19 +52,32 @@ void KeyUpInput(unsigned char key, int x, int y)
 
 void ProcessMouse(int button, int state, int x, int y)
 {
-	if ((button == GLUT_RIGHT_BUTTON) && (state == GLUT_DOWN))
+	if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN))
 	{
-		player.Fire();
+		if (shootcount > BULLETCOUNT - 1)
+		{
+			shootcount = 0;
+		}
+		bullet[shootcount].SetShoot(true);
+		shootcount += 1;
+		clicked = true;
+	}
+	if (clicked)
+	{
+		//if (shootcount > BULLETCOUNT - 1)
+		//	shootcount = 0;
+		//bullet[shootcount].SetShoot(true);
+		//shootcount += 1;
+		clicked = false;
 	}
 }
 
 void ProcessMouseMotion(int x, int y)
 {
-
 }
 
 void display()
-{
+{ 
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
 	int elapsedTime = currentTime - g_prevTimeInMillisecond;
 	g_prevTimeInMillisecond = currentTime;
@@ -74,6 +93,19 @@ void display()
 	glPushMatrix();
 	player.DrawPlayer();
 	player.Move(elapsedTimeInSec, &tempInputs);
+	weapon.DrawWeapon();
+	glPopMatrix();
+
+	glPushMatrix();
+	for (int i = 0; i < BULLETCOUNT; ++i)
+	{
+		if (bullet[i].GetShoot())
+		{
+			bullet[i].GetPos(player.GetX(), player.GetY());
+			bullet[i].UpdateSpeed(BULLETSPEED);
+			bullet[i].DrawBullet();
+		}
+	}
 	glPopMatrix();
 
 	glFlush();
@@ -103,9 +135,10 @@ void InitOpenGL(int argc, char** argv)
 
 	// 마우스 처리
 	glutMouseFunc(ProcessMouse);
-	glutMotionFunc(ProcessMouseMotion);
-	g_prevTimeInMillisecond = glutGet(GLUT_ELAPSED_TIME);
+	glutPassiveMotionFunc(ProcessMouseMotion);
 
+	g_prevTimeInMillisecond = glutGet(GLUT_ELAPSED_TIME);
+	
 	glutTimerFunc(1, Timerfunction, 1);
 	glClearColor(1.f, 1.f, 1.f, 0.f);
 	glMatrixMode(GL_PROJECTION);
