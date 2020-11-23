@@ -1,11 +1,14 @@
 #pragma once
 #include "GL/glut.h"
+#include <iostream>
+#include <math.h>
 
 #define WIDTH 1200
 #define HEIGHT 800
-#define MOVESPEED 0.3
+#define MOVESPEED 300
 #define BULLETSPEED 1
-#define BULLETCOUNT 5
+#define BULLETCOUNT 30
+#define PI 3.1415926535
 
 typedef struct Inputs
 {

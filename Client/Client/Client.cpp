@@ -1,16 +1,29 @@
 #include <WinSock2.h>
-#include <iostream>
 #include "Player.h"
 #include "Weapon.h"
 #include "Bullet.h"
+#include "Map.h"
 
 Player player;
 Weapon weapon;
 Bullet bullet[BULLETCOUNT];
+Map map;
 Inputs inputs;
 int g_prevTimeInMillisecond = 0;
 bool clicked = false;
 int shootcount = 0;
+float rotate = 0;
+float rotate1 = 0;
+float player_angle = 0;
+
+void GetAngle(int mouse_x, int mouse_y)
+{
+	float width = fabs(mouse_x - player.GetX());
+	float height = fabs(mouse_y - player.GetY());
+	float radian = atan2(height, width);
+
+	rotate = radian * 180 / PI;
+}
 
 void KeyDownInput(unsigned char key, int x, int y)
 {
@@ -60,20 +73,34 @@ void ProcessMouse(int button, int state, int x, int y)
 		}
 		bullet[shootcount].SetShoot(true);
 		shootcount += 1;
-		clicked = true;
-	}
-	if (clicked)
-	{
-		//if (shootcount > BULLETCOUNT - 1)
-		//	shootcount = 0;
-		//bullet[shootcount].SetShoot(true);
-		//shootcount += 1;
-		clicked = false;
 	}
 }
 
 void ProcessMouseMotion(int x, int y)
 {
+	float mx = x;
+	float my = HEIGHT - y;
+	float width = fabs(mx - player.GetX());
+	float height = fabs(my - player.GetY());
+	float radian;
+
+	if (player.GetX() < mx)
+	{
+		if (player.GetY() < my)
+			radian = atan2(height, width);
+		else
+			radian = atan2(-height, width);
+
+	}
+	else
+	{
+		if (player.GetY() < my)
+			radian = atan2(height, -width);
+		else
+			radian = atan2(-height, -width);
+
+	}
+	rotate = radian * 180 / PI;
 }
 
 void display()
@@ -91,21 +118,31 @@ void display()
 	glColor3f(1.f, 1.f, 1.f);
 
 	glPushMatrix();
-	player.DrawPlayer();
-	player.Move(elapsedTimeInSec, &tempInputs);
-	weapon.DrawWeapon();
+		glTranslatef(player.GetX(), player.GetY(), 0);
+		glRotatef(rotate, 0, 0, 1);
+		glTranslatef(-player.GetX(), -player.GetY(), 0);
+		glPushMatrix();
+			player.DrawPlayer();
+			player.Move(elapsedTimeInSec, &tempInputs);
+			weapon.DrawWeapon();
+
+			glPushMatrix();
+				for (int i = 0; i < BULLETCOUNT; ++i)
+				{
+					if (bullet[i].GetShoot())
+					{
+						glLoadIdentity();
+						glTranslatef(player.GetX() + 70, player.GetY(), 0);
+						bullet[i].UpdateSpeed(BULLETSPEED);
+						bullet[i].DrawBullet();
+					}
+				}
+			glPopMatrix();
+		glPopMatrix();
 	glPopMatrix();
 
 	glPushMatrix();
-	for (int i = 0; i < BULLETCOUNT; ++i)
-	{
-		if (bullet[i].GetShoot())
-		{
-			bullet[i].GetPos(player.GetX(), player.GetY());
-			bullet[i].UpdateSpeed(BULLETSPEED);
-			bullet[i].DrawBullet();
-		}
-	}
+	map.DrawMap();
 	glPopMatrix();
 
 	glFlush();
@@ -143,7 +180,8 @@ void InitOpenGL(int argc, char** argv)
 	glClearColor(1.f, 1.f, 1.f, 0.f);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluOrtho2D(-WIDTH / 2, WIDTH / 2, -HEIGHT / 2, HEIGHT / 2);
+	//gluOrtho2D(-WIDTH / 2, WIDTH / 2, -HEIGHT / 2, HEIGHT / 2);
+	gluOrtho2D(0, WIDTH, 0, HEIGHT);
 
 	glutMainLoop();
 }
@@ -152,7 +190,6 @@ int main(int argc, char** argv)
 {
 	//WSADATA WSAData;
 	//WSAStartup(MAKEWORD(2, 2), &WSAData);
-
 
 	InitOpenGL(argc, argv);
 	return 0;
