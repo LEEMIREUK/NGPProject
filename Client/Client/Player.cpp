@@ -2,15 +2,13 @@
 
 Player::Player()
 {
-	m_PositionX = 0.f;
-	m_PositionY = 0.f;
-	m_Speed_Up = 0.f;
-	m_Speed_Left = 0.f;
-	m_Speed_Down = 0.f;
-	m_Speed_Right = 0.f;
-	m_Speed_X = 0.f;
-	m_Speed_Y = 0.f;
-	m_Size = 0.1f;
+	m_PositionX = 0;
+	m_PositionY = 0;
+	m_Speed_Up = 0;
+	m_Speed_Left = 0;
+	m_Speed_Down = 0;
+	m_Speed_Right = 0;
+	m_Size = 25;
 	m_PlayerID = NULL;
 }
 
@@ -24,7 +22,7 @@ void Player::DrawPlayer()
 	m_PositionX = m_Speed_Left + m_Speed_Right;
 	m_PositionY = m_Speed_Up + m_Speed_Down;
 
-
+	glPushMatrix();
 	glBegin(GL_QUADS);
 	glColor3f(0.7f, 0.4f, 0.2f);
 	glVertex2f(-m_Size, -m_Size);
@@ -32,6 +30,7 @@ void Player::DrawPlayer()
 	glVertex2f(+m_Size, +m_Size);
 	glVertex2f(+m_Size, -m_Size);
 	glEnd();
+	glPopMatrix();
 }
 
 void Player::Move(float elapsedTimeInSec, Inputs* inputs)
@@ -64,7 +63,7 @@ void Player::Move(float elapsedTimeInSec, Inputs* inputs)
 	}
 	if (!inputs->KEY_A)
 	{
-		m_Speed_Left -= MOVESPEED * t;
+		m_Speed_Left += MOVESPEED * t;
 		if (m_Speed_Left < 0)
 		{
 			m_Speed_Left = 0;
@@ -72,7 +71,7 @@ void Player::Move(float elapsedTimeInSec, Inputs* inputs)
 	}
 	if (!inputs->KEY_S)
 	{
-		m_Speed_Down -= MOVESPEED * t;
+		m_Speed_Down += MOVESPEED * t;
 		if (m_Speed_Down < 0)
 		{
 			m_Speed_Down = 0;

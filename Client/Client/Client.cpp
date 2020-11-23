@@ -1,13 +1,9 @@
+#include <WinSock2.h>
 #include <iostream>
-#include <WS2tcpip.h>
-#pragma comment (lib, "ws2_32") 
 #include "Player.h"
-#include "../../protocol.h"
 
 Player player;
 Inputs inputs;
-SOCKET cSocket;
-sockaddr_in sockAddr;
 int g_prevTimeInMillisecond = 0;
 
 void KeyDownInput(unsigned char key, int x, int y)
@@ -63,9 +59,6 @@ void ProcessMouseMotion(int x, int y)
 
 void display()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
-	glColor3f(1.f, 1.f, 1.f);
-
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
 	int elapsedTime = currentTime - g_prevTimeInMillisecond;
 	g_prevTimeInMillisecond = currentTime;
@@ -74,16 +67,52 @@ void display()
 	Inputs tempInputs;
 	memcpy(&tempInputs, &inputs, sizeof(Inputs));
 
-	player.Move(elapsedTimeInSec, &tempInputs);
-	player.DrawPlayer();
+	glMatrixMode(GL_MODELVIEW);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glColor3f(1.f, 1.f, 1.f);
 
-	glutSwapBuffers();
+	glPushMatrix();
+	player.DrawPlayer();
+	player.Move(elapsedTimeInSec, &tempInputs);
+	glPopMatrix();
+
+	glFlush();
 }
 
 void Timerfunction(int value)
 {
 	glutPostRedisplay();
-	glutTimerFunc(10, Timerfunction, 10);
+	glutTimerFunc(1, Timerfunction, 1);
+}
+
+void InitOpenGL(int argc, char** argv)
+{
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+	glutInitWindowSize(WIDTH, HEIGHT);
+	glutInitWindowPosition(200, 100);
+	glutCreateWindow("Shooting Nemo");
+	glutDisplayFunc(display);
+
+	// 키보드 처리
+	glutKeyboardFunc(KeyDownInput);
+	glutKeyboardUpFunc(KeyUpInput);
+
+	////Init inputs
+	//memset(&inputs, 0, sizeof(Inputs));
+
+	// 마우스 처리
+	glutMouseFunc(ProcessMouse);
+	glutMotionFunc(ProcessMouseMotion);
+	g_prevTimeInMillisecond = glutGet(GLUT_ELAPSED_TIME);
+
+	glutTimerFunc(1, Timerfunction, 1);
+	glClearColor(1.f, 1.f, 1.f, 0.f);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(-WIDTH / 2, WIDTH / 2, -HEIGHT / 2, HEIGHT / 2);
+
+	glutMainLoop();
 }
 
 int main(int argc, char** argv)
@@ -91,39 +120,7 @@ int main(int argc, char** argv)
 	//WSADATA WSAData;
 	//WSAStartup(MAKEWORD(2, 2), &WSAData);
 
-	//cSocket = socket(AF_INET, SOCK_STREAM, 0);
-	//sockAddr.sin_family = AF_INET;
-	//sockAddr.sin_port = htons(5959);
-	//sockAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-	//connect(cSocket, (SOCKADDR*)&sockAddr, sizeof(sockAddr));
-	//u_long isnonBlock = 1;
-	//ioctlsocket(cSocket, FIONBIO, &isnonBlock);
 
-	// 초기화 함수들
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
-	glutInitWindowPosition(200, 100);
-	glutInitWindowSize(WIDTH, HEIGHT);
-	glutCreateWindow("Shooting Nemo");
-
-	//Init inputs
-	memset(&inputs, 0, sizeof(Inputs));
-
-	glutDisplayFunc(display);
-
-	// 키보드 처리
-	glutKeyboardFunc(KeyDownInput);
-	glutKeyboardUpFunc(KeyUpInput);
-
-	// 마우스 처리
-	glutMouseFunc(ProcessMouse);
-	glutMotionFunc(ProcessMouseMotion);
-
-	g_prevTimeInMillisecond = glutGet(GLUT_ELAPSED_TIME);
-
-	glutTimerFunc(10, Timerfunction, 10);
-
-	glutMainLoop();
-
+	InitOpenGL(argc, argv);
 	return 0;
 }

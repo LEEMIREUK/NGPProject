@@ -1,7 +1,7 @@
 #pragma once
 #include "GL/glut.h"
 
-#define WIDTH 800
+#define WIDTH 1200
 #define HEIGHT 800
 #define MOVESPEED 0.01f
 
