@@ -14,11 +14,8 @@ Map map;
 Inputs inputs;
 
 int g_prevTimeInMillisecond = 0;
-bool clicked = false;
 int shootcount = 0;
 float rotate = 0;
-float rotate1 = 0;
-float player_angle = 0;
 char recvBuffer[MAX_BUFFER];
 int myID;
 
@@ -38,7 +35,6 @@ void error_display(const char* msg, int err_no)
 	std::wcout << L"에러 (" << err_no << ") " << lpMsgBuf << std::endl;
 	LocalFree(lpMsgBuf);
 }
-
 
 void process_packet(char* packet)
 {
@@ -106,15 +102,6 @@ void process_recv(int recv_bytes)
 	}
 }
 
-void GetAngle(int mouse_x, int mouse_y)
-{
-	float width = fabs(mouse_x - player.GetX());
-	float height = fabs(mouse_y - player.GetY());
-	float radian = atan2(height, width);
-
-	rotate = radian * 180 / PI;
-}
-
 void KeyDownInput(unsigned char key, int x, int y)
 {
 	CTOS_MOVE p;
@@ -169,6 +156,10 @@ void ProcessMouse(int button, int state, int x, int y)
 {
 	if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN))
 	{
+		// 총알을 쏠때 초기 위치를 잡아줄 플레이어의 좌표 받기
+		bullet[shootcount].SetPos(player.GetX(), player.GetY());
+		bullet[shootcount].SetShootAngle(rotate);
+
 		if (shootcount > BULLETCOUNT - 1)
 		{
 			shootcount = 0;
@@ -238,22 +229,20 @@ void display()
 		glTranslatef(-player.GetX(), -player.GetY(), 0);
 		glPushMatrix();
 			player.DrawPlayer();
-			//player.Move(elapsedTimeInSec, &tempInputs);
+			player.Move(elapsedTimeInSec, &tempInputs);
 			weapon.DrawWeapon();
-
-			glPushMatrix();
-				for (int i = 0; i < BULLETCOUNT; ++i)
-				{
-					if (bullet[i].GetShoot())
-					{
-						glLoadIdentity();
-						glTranslatef(player.GetX() + 70, player.GetY(), 0);
-						bullet[i].UpdateSpeed(BULLETSPEED);
-						bullet[i].DrawBullet();
-					}
-				}
-			glPopMatrix();
 		glPopMatrix();
+	glPopMatrix();
+
+	glPushMatrix();
+		for (int i = 0; i < BULLETCOUNT; ++i)
+		{
+			if (bullet[i].GetShoot())
+			{
+				bullet[i].UpdateSpeed(BULLETSPEED * elapsedTimeInSec);
+				bullet[i].DrawBullet();
+			}
+		}
 	glPopMatrix();
 
 	glPushMatrix();

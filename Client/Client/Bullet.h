@@ -11,11 +11,13 @@ public:
 	void UpdateSpeed(float speed);
 	bool GetShoot();
 	void SetShoot(bool shooting);
-	void GetPos(float x, float y);
+	void SetPos(float x, float y);
+	void SetShootAngle(float angle);
 private:
 	float bulletSpeed;
 	float bulletX, bulletY;
 	bool shoot;
+	float angle;
 	Player player;
 };
 

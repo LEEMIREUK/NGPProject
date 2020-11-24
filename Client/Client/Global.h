@@ -6,7 +6,7 @@
 #define WIDTH 1200
 #define HEIGHT 800
 #define MOVESPEED 300
-#define BULLETSPEED 1
+#define BULLETSPEED 300
 #define BULLETCOUNT 30
 #define PI 3.1415926535
 
