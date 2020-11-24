@@ -25,6 +25,21 @@ int myID;
 SOCKET cSocket;
 sockaddr_in sockAddr;
 
+void error_display(const char* msg, int err_no)
+{
+	WCHAR* lpMsgBuf;
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL, err_no,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&lpMsgBuf, 0, NULL);
+	std::cout << msg;
+	std::wcout << L"¿¡·¯ (" << err_no << ") " << lpMsgBuf << std::endl;
+	LocalFree(lpMsgBuf);
+}
+
+
 void process_packet(char* packet)
 {
 	switch (packet[1])
@@ -34,8 +49,18 @@ void process_packet(char* packet)
 			STOC_NEW_CLIENT* p = reinterpret_cast<STOC_NEW_CLIENT*>(packet);
 			myID = p->id;
 			player.SetPos(p->x, p->y);
-			player.SetSize(p->size);
-			std::cout << static_cast<int>(p->id) << ", " << p->x << ", " << p->y << ", " << static_cast<float>(p->size) << std::endl;
+			player.SetSize(p->player_size);
+			break;
+		}
+		case stoc_move:
+		{
+			std::cout << "recv move packet" << std::endl;
+			STOC_MOVE* p = reinterpret_cast<STOC_MOVE*>(packet);
+			if (p->id == myID)
+			{
+				std::cout << p->x << ", " << p->y << std::endl;
+				player.SetPos(p->x, p->y);
+			}
 			break;
 		}
 		case stoc_world_state:
@@ -43,9 +68,9 @@ void process_packet(char* packet)
 			STOC_WORLD_STATE* p = reinterpret_cast<STOC_WORLD_STATE*>(packet);
 			for (int i = 0; i < 2; ++i)
 			{
-				if (p->clients_state->is_connected && i == myID)
+				if (p->clients_state[i].is_connected && i == myID)
 				{
-					player.SetPos(p->clients_state[i].x, p->clients_state[i].y);
+					//player.SetPos(p->clients_state[i].x, p->clients_state[i].y);
 				}
 			}
 			break;
@@ -102,21 +127,22 @@ void KeyDownInput(unsigned char key, int x, int y)
 	{
 	case 'w' | 'W':
 		inputs.KEY_W = true;
-		p.dir == DIR_UP;
+		p.dir = DIR_UP;
 		break;
 	case 'a' | 'A':
 		inputs.KEY_A = true;
-		p.dir == DIR_LEFT;
+		p.dir = DIR_LEFT;
 		break;
 	case 's' | 'S':
 		inputs.KEY_S = true;
-		p.dir == DIR_DOWN;
+		p.dir = DIR_DOWN;
 		break;
 	case 'd' | 'D':
 		inputs.KEY_D = true;
-		p.dir == DIR_RIGHT;
+		p.dir = DIR_RIGHT;
 		break;
 	}
+
 	send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
 }
 
@@ -190,7 +216,17 @@ void display()
 	memcpy(&tempInputs, &inputs, sizeof(Inputs));
 
 	int recv_result = recv(cSocket, recvBuffer, MAX_BUFFER, 0);
-	if (recv_result > 0) process_recv(recv_result);
+	if (recv_result == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() != WSAEWOULDBLOCK)
+		{
+			closesocket(cSocket);
+			WSACleanup();
+		}
+		
+	}
+	else if (recv_result == 0) return;
+	else process_recv(recv_result);
 
 	glMatrixMode(GL_MODELVIEW);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -230,7 +266,7 @@ void display()
 void Timerfunction(int value)
 {
 	glutPostRedisplay();
-	glutTimerFunc(16, Timerfunction, 1);
+	glutTimerFunc(1, Timerfunction, 1);
 }
 
 void InitOpenGL(int argc, char** argv)
@@ -271,7 +307,7 @@ void InitOpenGL(int argc, char** argv)
 
 		g_prevTimeInMillisecond = glutGet(GLUT_ELAPSED_TIME);
 
-		glutTimerFunc(16, Timerfunction, 1);
+		glutTimerFunc(1, Timerfunction, 1);
 		glClearColor(1.f, 1.f, 1.f, 0.f);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -285,6 +321,7 @@ void InitOpenGL(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
+	std::wcout.imbue(std::locale("korean"));
 	InitOpenGL(argc, argv);
 	return 0;
 }

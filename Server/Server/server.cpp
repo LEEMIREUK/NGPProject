@@ -43,18 +43,19 @@ void process_packet(int id)
 		{
 			CTOS_MOVE* p = reinterpret_cast<CTOS_MOVE*>(packet);
 			auto dir = p->dir;
-			auto cur_time = system_clock::now();
-			auto elapsed_time = (cur_time - p->time).count();
-			
+			duration<double> elapsed_time = system_clock::now() - p->time;
+			cout << fixed;
+			cout.precision(6);
+			cout << elapsed_time.count() << endl;
 			if (dir == DIR_UP)
 			{	
 				clients[id].ReadLock();
 				auto curY = clients[id].GetY();
 				clients[id].ReadUnlock();
 
-				curY += PLAYER_Y_SPEED * elapsed_time;
+				//curY += PLAYER_Y_SPEED * elapsed_time.count();
 				clients[id].WriteLock();
-				clients[id].SetY(curY);
+				clients[id].SetY(curY + 4);
 				clients[id].WriteUnlock();
 			}
 			else if (dir == DIR_DOWN)
@@ -63,9 +64,9 @@ void process_packet(int id)
 				auto curY = clients[id].GetY();
 				clients[id].ReadUnlock();
 
-				curY -= PLAYER_Y_SPEED * elapsed_time;
+				//curY -= PLAYER_Y_SPEED * elapsed_time.count();
 				clients[id].WriteLock();
-				clients[id].SetY(curY);
+				clients[id].SetY(curY - 4);
 				clients[id].WriteUnlock();
 			}
 			else if (dir == DIR_LEFT)
@@ -74,9 +75,9 @@ void process_packet(int id)
 				auto curX = clients[id].GetX();
 				clients[id].ReadUnlock();
 
-				curX -= PLAYER_X_SPEED * elapsed_time;
+				//curX -= PLAYER_X_SPEED * elapsed_time.count();
 				clients[id].WriteLock();
-				clients[id].SetX(curX);
+				clients[id].SetX(curX - 4);
 				clients[id].WriteUnlock();
 			}
 			else if (dir == DIR_RIGHT)
@@ -85,11 +86,19 @@ void process_packet(int id)
 				auto curX = clients[id].GetX();
 				clients[id].ReadUnlock();
 
-				curX += PLAYER_X_SPEED * elapsed_time;
+				//curX += PLAYER_X_SPEED * elapsed_time.count();
 				clients[id].WriteLock();
-				clients[id].SetX(curX);
+				clients[id].SetX(curX + 4);
 				clients[id].WriteUnlock();
 			}
+			STOC_MOVE move_packet;
+			move_packet.id = id;
+			move_packet.size = sizeof(move_packet);
+			move_packet.type = stoc_move;
+			move_packet.x = clients[id].GetX();
+			move_packet.y = clients[id].GetY();
+			for (auto& cl : clients)
+				cl.SendPacket(reinterpret_cast<void*>(&move_packet), move_packet.size);
 			break;
 		}
 	case ctos_shoot:
@@ -116,14 +125,14 @@ void UpdateAndSendThread()
 				p.clients_state[i].hp = clients[i].GetHP();
 				p.clients_state[i].x = clients[i].GetX();
 				p.clients_state[i].y = clients[i].GetY();
-				p.clients_state->is_connected = true;
+				p.clients_state[i].is_connected = true;
 			}
 			else
 			{
 				p.clients_state[i].hp = NULL;
 				p.clients_state[i].x = NULL;
 				p.clients_state[i].y = NULL;
-				p.clients_state->is_connected = false;
+				p.clients_state[i].is_connected = false;
 			}
 			clients[i].ReadUnlock();
 		}
@@ -142,7 +151,9 @@ void RecvThread(int id)
 	{
 		int recv_bytes = clients[id].Recv();
 		if (recv_bytes == 0)
-			return;
+		{
+			clients[id].~Player();
+		}
 		else if (recv_bytes == SOCKET_ERROR)
 		{
 			string error_str = "Player" + to_string(id) + "recv error";
@@ -198,7 +209,7 @@ int main()
 	::bind(lSocket, (SOCKADDR*)&sockAddr, sizeof(sockAddr));
 	listen(lSocket, SOMAXCONN);
 
-	auto update_thread = thread{ UpdateAndSendThread };
+	//auto update_thread = thread{ UpdateAndSendThread };
 	thread recv_thread[2];
 	sockaddr_in stoc_sockAddr;
 	int addrSize = sizeof(stoc_sockAddr);
@@ -218,7 +229,6 @@ int main()
 		p.x = clients[user_id].GetX();
 		p.y = clients[user_id].GetY();
 		p.player_size = clients[user_id].GetSize();
-		cout << static_cast<float>(p.player_size) << endl;
 		
 		//접속한 클라이언트 정보를 모든 클라이언트에게 전송한다.
 		for (auto& cl : clients)
@@ -229,7 +239,7 @@ int main()
 	//다른 스레드가 종료될 때 까지 기다린다.
 	for (auto& th : recv_thread)
 		th.join();
-	update_thread.join();
+	//update_thread.join();
 
 	WSACleanup();
 }

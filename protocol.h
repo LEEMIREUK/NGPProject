@@ -25,9 +25,9 @@
 #define SERVER_PORT 5959
 #define MAX_BUFFER 5120
 ///////////////////////////////////////////////////////////////////////////////
-#define PLAYER_X_SPEED 300
-#define PLAYER_Y_SPEED 300
-#define PLAYER_SIZE 25
+#define PLAYER_X_SPEED 300.f
+#define PLAYER_Y_SPEED 300.f
+#define PLAYER_SIZE 25.f
 ///////////////////////////////////////////////////////////////////////////////
 #pragma pack(push, 1)
 
@@ -89,8 +89,8 @@ struct STOC_MOVE {
 	unsigned char size;
 	unsigned char type;
 	unsigned char id;
-	short x;
-	short y;
+	float x;
+	float y;
 };
 
 struct STOC_HIT {
