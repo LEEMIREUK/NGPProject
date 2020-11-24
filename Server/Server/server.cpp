@@ -2,7 +2,6 @@
 #include <iostream>
 #include <string>
 #include <thread>
-#include <mutex>
 #include "Player.h"
 #include "../../protocol.h"
 #pragma comment (lib, "ws2_32")
@@ -13,7 +12,7 @@ using namespace chrono;
 int user_id = 0;
 Player clients[2];
 CLIENT_STATE clients_state[2];
-float starting_point[4]{ -0.7f, 0.f, 0.7f, 0.f };
+float starting_point[4]{ 300.f, 300.f, 900.f, 300.f };
 
 void error_display(const char* msg, int err_no)
 {
@@ -48,28 +47,48 @@ void process_packet(int id)
 			auto elapsed_time = (cur_time - p->time).count();
 			
 			if (dir == DIR_UP)
-			{
+			{	
+				clients[id].ReadLock();
 				auto curY = clients[id].GetY();
+				clients[id].ReadUnlock();
+
 				curY += PLAYER_Y_SPEED * elapsed_time;
+				clients[id].WriteLock();
 				clients[id].SetY(curY);
+				clients[id].WriteUnlock();
 			}
 			else if (dir == DIR_DOWN)
 			{
+				clients[id].ReadLock();
 				auto curY = clients[id].GetY();
+				clients[id].ReadUnlock();
+
 				curY -= PLAYER_Y_SPEED * elapsed_time;
+				clients[id].WriteLock();
 				clients[id].SetY(curY);
+				clients[id].WriteUnlock();
 			}
 			else if (dir == DIR_LEFT)
 			{
+				clients[id].ReadLock();
 				auto curX = clients[id].GetX();
+				clients[id].ReadUnlock();
+
 				curX -= PLAYER_X_SPEED * elapsed_time;
+				clients[id].WriteLock();
 				clients[id].SetX(curX);
+				clients[id].WriteUnlock();
 			}
 			else if (dir == DIR_RIGHT)
 			{
+				clients[id].ReadLock();
 				auto curX = clients[id].GetX();
+				clients[id].ReadUnlock();
+
 				curX += PLAYER_X_SPEED * elapsed_time;
+				clients[id].WriteLock();
 				clients[id].SetX(curX);
+				clients[id].WriteUnlock();
 			}
 			break;
 		}
@@ -85,11 +104,13 @@ void UpdateAndSendThread()
 {
 	while (true)
 	{
+		auto start_time = system_clock::now();
 		STOC_WORLD_STATE p;
 		p.size = sizeof(p);
 		p.type = stoc_world_state;
 		for (int i=0;i<2;++i)
 		{
+			clients[i].ReadLock();
 			if (clients[i].IsConnected())
 			{
 				p.clients_state[i].hp = clients[i].GetHP();
@@ -104,10 +125,14 @@ void UpdateAndSendThread()
 				p.clients_state[i].y = NULL;
 				p.clients_state->is_connected = false;
 			}
+			clients[i].ReadUnlock();
 		}
 
 		for (auto& cl : clients)
 			cl.SendPacket(reinterpret_cast<void*>(&p), p.size);
+		auto end_time = system_clock::now();
+		auto elapsed_time = duration_cast<milliseconds>(end_time - start_time);
+		this_thread::sleep_for(16ms - elapsed_time);
 	}
 }
 
@@ -193,6 +218,7 @@ int main()
 		p.x = clients[user_id].GetX();
 		p.y = clients[user_id].GetY();
 		p.player_size = clients[user_id].GetSize();
+		cout << static_cast<float>(p.player_size) << endl;
 		
 		//접속한 클라이언트 정보를 모든 클라이언트에게 전송한다.
 		for (auto& cl : clients)
@@ -204,4 +230,6 @@ int main()
 	for (auto& th : recv_thread)
 		th.join();
 	update_thread.join();
+
+	WSACleanup();
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include <WS2tcpip.h>
+#include <shared_mutex>
 #include "../../protocol.h"
+using namespace std;
 
 class Player
 {
@@ -15,6 +17,8 @@ class Player
 	float size;
 	int hp;
 	bool is_connected;
+	shared_mutex mx;
+
 public:
 	Player() { is_connected = false; };
 	~Player() { closesocket(stoc_socket); }
@@ -38,6 +42,11 @@ public:
 	void SetRecvStart(char* new_start_ptr) { recv_start_ptr = new_start_ptr; };
 	void SetPacketStartPtr(char* new_packet_start_ptr) { packet_start_ptr = new_packet_start_ptr; }
 	void ResetPacketStartPtr() { packet_start_ptr = recv_start_ptr; }
+
+	void ReadLock() { mx.lock_shared(); }
+	void ReadUnlock() { mx.unlock_shared(); }
+	void WriteLock() { mx.lock(); }
+	void WriteUnlock() { mx.unlock(); }
 
 	int Recv();
 	int SendPacket(void* packet, int p_size);

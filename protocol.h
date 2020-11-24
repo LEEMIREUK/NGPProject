@@ -25,9 +25,9 @@
 #define SERVER_PORT 5959
 #define MAX_BUFFER 5120
 ///////////////////////////////////////////////////////////////////////////////
-#define PLAYER_X_SPEED 0.5
-#define PLAYER_Y_SPEED 0.5
-#define PLAYER_SIZE 0.1
+#define PLAYER_X_SPEED 300
+#define PLAYER_Y_SPEED 300
+#define PLAYER_SIZE 25
 ///////////////////////////////////////////////////////////////////////////////
 #pragma pack(push, 1)
 

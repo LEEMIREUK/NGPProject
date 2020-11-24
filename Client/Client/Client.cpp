@@ -1,20 +1,85 @@
-#include <WinSock2.h>
+#include <WS2tcpip.h>
+#include <iostream>
+#pragma comment (lib, "ws2_32")
 #include "Player.h"
 #include "Weapon.h"
 #include "Bullet.h"
 #include "Map.h"
+#include "../../protocol.h"
 
 Player player;
 Weapon weapon;
 Bullet bullet[BULLETCOUNT];
 Map map;
 Inputs inputs;
+
 int g_prevTimeInMillisecond = 0;
 bool clicked = false;
 int shootcount = 0;
 float rotate = 0;
 float rotate1 = 0;
 float player_angle = 0;
+char recvBuffer[MAX_BUFFER];
+int myID;
+
+SOCKET cSocket;
+sockaddr_in sockAddr;
+
+void process_packet(char* packet)
+{
+	switch (packet[1])
+	{
+		case stoc_new_client:
+		{
+			STOC_NEW_CLIENT* p = reinterpret_cast<STOC_NEW_CLIENT*>(packet);
+			myID = p->id;
+			player.SetPos(p->x, p->y);
+			player.SetSize(p->size);
+			std::cout << static_cast<int>(p->id) << ", " << p->x << ", " << p->y << ", " << static_cast<float>(p->size) << std::endl;
+			break;
+		}
+		case stoc_world_state:
+		{
+			STOC_WORLD_STATE* p = reinterpret_cast<STOC_WORLD_STATE*>(packet);
+			for (int i = 0; i < 2; ++i)
+			{
+				if (p->clients_state->is_connected && i == myID)
+				{
+					player.SetPos(p->clients_state[i].x, p->clients_state[i].y);
+				}
+			}
+			break;
+		}
+	}
+}
+
+void process_recv(int recv_bytes)
+{
+	char* ptr = recvBuffer;
+	static int in_packet_size = 0;
+	static int saved_packet_size = 0;
+	static char packet_buffer[MAX_BUFFER];
+
+	while (0 != recv_bytes)
+	{
+		if (0 == in_packet_size) in_packet_size = ptr[0];
+		if (recv_bytes + saved_packet_size >= in_packet_size)
+		{
+			memcpy(packet_buffer + saved_packet_size, ptr, in_packet_size - saved_packet_size);
+			process_packet(packet_buffer);
+			ptr += in_packet_size - saved_packet_size;
+			recv_bytes -= in_packet_size - saved_packet_size;
+			in_packet_size = 0;
+			saved_packet_size = 0;
+		}
+		else
+		{
+			memcpy(packet_buffer + saved_packet_size, ptr, recv_bytes);
+			saved_packet_size += recv_bytes;
+			recv_bytes = 0;
+		}
+	}
+}
 
 void GetAngle(int mouse_x, int mouse_y)
 {
@@ -27,21 +92,32 @@ void GetAngle(int mouse_x, int mouse_y)
 
 void KeyDownInput(unsigned char key, int x, int y)
 {
+	CTOS_MOVE p;
+	p.id = myID;
+	p.size = sizeof(p);
+	p.type = ctos_move;
+	p.time = std::chrono::system_clock::now();
+
 	switch (key)
 	{
 	case 'w' | 'W':
 		inputs.KEY_W = true;
+		p.dir == DIR_UP;
 		break;
 	case 'a' | 'A':
 		inputs.KEY_A = true;
+		p.dir == DIR_LEFT;
 		break;
 	case 's' | 'S':
 		inputs.KEY_S = true;
+		p.dir == DIR_DOWN;
 		break;
 	case 'd' | 'D':
 		inputs.KEY_D = true;
+		p.dir == DIR_RIGHT;
 		break;
 	}
+	send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
 }
 
 void KeyUpInput(unsigned char key, int x, int y)
@@ -113,6 +189,9 @@ void display()
 	Inputs tempInputs;
 	memcpy(&tempInputs, &inputs, sizeof(Inputs));
 
+	int recv_result = recv(cSocket, recvBuffer, MAX_BUFFER, 0);
+	if (recv_result > 0) process_recv(recv_result);
+
 	glMatrixMode(GL_MODELVIEW);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glColor3f(1.f, 1.f, 1.f);
@@ -123,7 +202,7 @@ void display()
 		glTranslatef(-player.GetX(), -player.GetY(), 0);
 		glPushMatrix();
 			player.DrawPlayer();
-			player.Move(elapsedTimeInSec, &tempInputs);
+			//player.Move(elapsedTimeInSec, &tempInputs);
 			weapon.DrawWeapon();
 
 			glPushMatrix();
@@ -151,46 +230,61 @@ void display()
 void Timerfunction(int value)
 {
 	glutPostRedisplay();
-	glutTimerFunc(1, Timerfunction, 1);
+	glutTimerFunc(16, Timerfunction, 1);
 }
 
 void InitOpenGL(int argc, char** argv)
 {
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-	glutInitWindowSize(WIDTH, HEIGHT);
-	glutInitWindowPosition(200, 100);
-	glutCreateWindow("Shooting Nemo");
-	glutDisplayFunc(display);
+	WSADATA WSAData;
+	WSAStartup(MAKEWORD(2, 2), &WSAData);
+	cSocket = socket(AF_INET, SOCK_STREAM, 0);
+	sockAddr.sin_family = AF_INET;
+	sockAddr.sin_port = htons(SERVER_PORT);
+	sockAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	int conn_result = connect(cSocket, (SOCKADDR*)&sockAddr, sizeof(sockAddr));
 
-	// 虐焊靛 贸府
-	glutKeyboardFunc(KeyDownInput);
-	glutKeyboardUpFunc(KeyUpInput);
+	if (conn_result == 0)
+	{
+		int recv_bytes = recv(cSocket, recvBuffer, MAX_BUFFER, 0);
+		if (recv_bytes > 0) process_recv(recv_bytes);
 
-	////Init inputs
-	//memset(&inputs, 0, sizeof(Inputs));
+		unsigned long nonBlocking = 1;
+		ioctlsocket(cSocket, FIONBIO, &nonBlocking);
 
-	// 付快胶 贸府
-	glutMouseFunc(ProcessMouse);
-	glutPassiveMotionFunc(ProcessMouseMotion);
+		glutInit(&argc, argv);
+		glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+		glutInitWindowSize(WIDTH, HEIGHT);
+		glutInitWindowPosition(200, 100);
+		glutCreateWindow("Shooting Nemo");
+		glutDisplayFunc(display);
 
-	g_prevTimeInMillisecond = glutGet(GLUT_ELAPSED_TIME);
-	
-	glutTimerFunc(1, Timerfunction, 1);
-	glClearColor(1.f, 1.f, 1.f, 0.f);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	//gluOrtho2D(-WIDTH / 2, WIDTH / 2, -HEIGHT / 2, HEIGHT / 2);
-	gluOrtho2D(0, WIDTH, 0, HEIGHT);
+		// 虐焊靛 贸府
+		glutKeyboardFunc(KeyDownInput);
+		glutKeyboardUpFunc(KeyUpInput);
 
-	glutMainLoop();
+		////Init inputs
+		//memset(&inputs, 0, sizeof(Inputs));
+
+		// 付快胶 贸府
+		glutMouseFunc(ProcessMouse);
+		glutPassiveMotionFunc(ProcessMouseMotion);
+
+		g_prevTimeInMillisecond = glutGet(GLUT_ELAPSED_TIME);
+
+		glutTimerFunc(16, Timerfunction, 1);
+		glClearColor(1.f, 1.f, 1.f, 0.f);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		//gluOrtho2D(-WIDTH / 2, WIDTH / 2, -HEIGHT / 2, HEIGHT / 2);
+		gluOrtho2D(0, WIDTH, 0, HEIGHT);
+
+		glutMainLoop();
+	}
+	else return;
 }
 
 int main(int argc, char** argv)
 {
-	//WSADATA WSAData;
-	//WSAStartup(MAKEWORD(2, 2), &WSAData);
-
 	InitOpenGL(argc, argv);
 	return 0;
 }
