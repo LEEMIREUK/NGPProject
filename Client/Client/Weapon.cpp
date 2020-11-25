@@ -12,8 +12,6 @@ Weapon::~Weapon()
 void Weapon::DrawWeapon()
 {
 	glPushMatrix();
-	glTranslatef(25, 0, 0);
-
 	// º’¿‚¿Ã-------------------
 	glPushMatrix();
 	glTranslatef(0, 15, 0);

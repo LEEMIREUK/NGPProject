@@ -8,7 +8,6 @@ public:
 	~Weapon();
 
 	void DrawWeapon();
-	void DrawBullet();
 private:
 	float m_bulletX, m_bulletY;
 	float bulletSpeed;

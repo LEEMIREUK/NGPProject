@@ -6,7 +6,7 @@ Player::Player()
 	m_PositionY = 400;
 	m_Speed_X = 0;
 	m_Speed_Y = 0;
-	m_Size = 25;
+	m_Size = 30;
 	m_PlayerID = NULL;
 	m_connected = false;
 }
@@ -18,13 +18,15 @@ Player::~Player()
 void Player::DrawPlayer()
 {
 	glTranslatef(m_PositionX, m_PositionY, 0.f);
+	glPushMatrix(); 
 	glBegin(GL_QUADS);
 	glColor3f(0.7f, 0.4f, 0.2f);
 	glVertex2f(-m_Size, -m_Size);
 	glVertex2f(-m_Size, +m_Size);
-	glVertex2f(+m_Size, +m_Size);
-	glVertex2f(+m_Size, -m_Size);
+	glVertex2f(0, +m_Size);
+	glVertex2f(0, -m_Size);
 	glEnd();
+	glPopMatrix();
 }
 
 void Player::Move(float elapsedTimeInSec, Inputs* inputs)
