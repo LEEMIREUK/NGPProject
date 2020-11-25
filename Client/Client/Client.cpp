@@ -7,7 +7,7 @@
 #include "Map.h"
 #include "../../protocol.h"
 
-Player player;
+Player player[2];
 Weapon weapon;
 Bullet bullet[BULLETCOUNT];
 Map map;
@@ -40,23 +40,27 @@ void process_packet(char* packet)
 {
 	switch (packet[1])
 	{
+		case stoc_login_ok:
+		{
+			STOC_LOGIN_OK* p = reinterpret_cast<STOC_LOGIN_OK*>(packet);
+			myID = p->id;
+			player[myID].SetPos(p->x, p->y);
+			player[myID].SetSize(p->player_size);
+			player[myID].SetConnected(true);
+			break;
+		}
 		case stoc_new_client:
 		{
 			STOC_NEW_CLIENT* p = reinterpret_cast<STOC_NEW_CLIENT*>(packet);
-			myID = p->id;
-			player.SetPos(p->x, p->y);
-			player.SetSize(p->player_size);
+			player[p->id].SetPos(p->x, p->y);
+			player[p->id].SetSize(p->player_size);
+			player[p->id].SetConnected(true);
 			break;
 		}
 		case stoc_move:
 		{
-			std::cout << "recv move packet" << std::endl;
 			STOC_MOVE* p = reinterpret_cast<STOC_MOVE*>(packet);
-			if (p->id == myID)
-			{
-				std::cout << p->x << ", " << p->y << std::endl;
-				player.SetPos(p->x, p->y);
-			}
+			player[p->id].SetPos(p->x, p->y);
 			break;
 		}
 		case stoc_world_state:
@@ -157,7 +161,7 @@ void ProcessMouse(int button, int state, int x, int y)
 	if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN))
 	{
 		// 총알을 쏠때 초기 위치를 잡아줄 플레이어의 좌표 받기
-		bullet[shootcount].SetPos(player.GetX(), player.GetY());
+		bullet[shootcount].SetPos(player[myID].GetX(), player[myID].GetY());
 		bullet[shootcount].SetShootAngle(rotate);
 
 		if (shootcount > BULLETCOUNT - 1)
@@ -173,13 +177,13 @@ void ProcessMouseMotion(int x, int y)
 {
 	float mx = x;
 	float my = HEIGHT - y;
-	float width = fabs(mx - player.GetX());
-	float height = fabs(my - player.GetY());
+	float width = fabs(mx - player[myID].GetX());
+	float height = fabs(my - player[myID].GetY());
 	float radian;
 
-	if (player.GetX() < mx)
+	if (player[myID].GetX() < mx)
 	{
-		if (player.GetY() < my)
+		if (player[myID].GetY() < my)
 			radian = atan2(height, width);
 		else
 			radian = atan2(-height, width);
@@ -187,7 +191,7 @@ void ProcessMouseMotion(int x, int y)
 	}
 	else
 	{
-		if (player.GetY() < my)
+		if (player[myID].GetY() < my)
 			radian = atan2(height, -width);
 		else
 			radian = atan2(-height, -width);
@@ -223,16 +227,21 @@ void display()
 	glClear(GL_COLOR_BUFFER_BIT);
 	glColor3f(1.f, 1.f, 1.f);
 
-	glPushMatrix();
-		glTranslatef(player.GetX(), player.GetY(), 0);
-		glRotatef(rotate, 0, 0, 1);
-		glTranslatef(-player.GetX(), -player.GetY(), 0);
-		glPushMatrix();
-			player.DrawPlayer();
-			player.Move(elapsedTimeInSec, &tempInputs);
+	for(auto& p : player)
+	{
+		if (p.GetConnected())
+		{
+			glPushMatrix();
+			glTranslatef(p.GetX(), p.GetY(), 0);
+			glRotatef(rotate, 0, 0, 1);
+			glTranslatef(-p.GetX(), -p.GetY(), 0);
+			glPushMatrix();
+			p.DrawPlayer();
 			weapon.DrawWeapon();
-		glPopMatrix();
-	glPopMatrix();
+			glPopMatrix();
+			glPopMatrix();
+		}
+	}
 
 	glPushMatrix();
 		for (int i = 0; i < BULLETCOUNT; ++i)

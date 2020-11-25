@@ -8,6 +8,7 @@ Player::Player()
 	m_Speed_Y = 0;
 	m_Size = 25;
 	m_PlayerID = NULL;
+	m_connected = false;
 }
 
 Player::~Player()
@@ -62,6 +63,11 @@ void Player::SetSize(float size)
 	m_Size = size;
 }
 
+void Player::SetConnected(bool value)
+{
+	m_connected = value;
+}
+
 void Player::GetPos(float* x, float* y)
 {
 	*x = m_PositionX;
@@ -71,6 +77,11 @@ void Player::GetPos(float* x, float* y)
 void Player::GetSize(float* size)
 {
 	*size = m_Size;
+}
+
+bool Player::GetConnected()
+{
+	return m_connected;
 }
 
 int Player::GetX()

@@ -14,6 +14,7 @@
 #define stoc_gamestart		31
 #define stoc_weapon_select	32
 #define stoc_world_state	33
+#define stoc_login_ok		34
 ///////////////////////////////////////////////////////////////////////////////
 #define DIR_UP			10
 #define DIR_DOWN 		11
@@ -75,6 +76,14 @@ struct CTOS_WEAPON_SELECT {
 	unsigned char weapon_type;
 };
 
+struct STOC_LOGIN_OK {
+	unsigned char size;
+	unsigned char type;
+	unsigned char id;
+	float x;
+	float y;
+	float player_size;
+};
 
 struct STOC_NEW_CLIENT {
 	unsigned char size;

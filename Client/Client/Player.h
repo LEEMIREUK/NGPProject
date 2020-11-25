@@ -12,8 +12,10 @@ public:
 	void Show();
 	void SetPos(float x, float y);
 	void SetSize(float size);
+	void SetConnected(bool value);
 	void GetPos(float* x, float* y);
 	void GetSize(float* size);
+	bool GetConnected();
 	int GetX();
 	int GetY();
 private:
@@ -25,5 +27,6 @@ private:
 	float m_Speed_Right;
 	float m_Speed_X;
 	float m_Speed_Y;
-	int m_PlayerID;
+	int	  m_PlayerID;
+	bool  m_connected;
 };
