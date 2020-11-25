@@ -16,6 +16,7 @@ Inputs inputs;
 int g_prevTimeInMillisecond = 0;
 int shootcount = 0;
 float rotate = 0;
+float radian = 0;
 char recvBuffer[MAX_BUFFER];
 int myID;
 
@@ -163,12 +164,13 @@ void ProcessMouse(int button, int state, int x, int y)
 		// 총알을 쏠때 초기 위치를 잡아줄 플레이어의 좌표 받기
 		bullet[shootcount].SetPos(player[myID].GetX(), player[myID].GetY());
 		bullet[shootcount].SetShootAngle(rotate);
+		bullet[shootcount].SetRadian(radian);
+		bullet[shootcount].SetShoot(true);
 
 		if (shootcount > BULLETCOUNT - 1)
 		{
-			shootcount = 0;
+			shootcount = -1;
 		}
-		bullet[shootcount].SetShoot(true);
 		shootcount += 1;
 	}
 }

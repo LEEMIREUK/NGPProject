@@ -2,22 +2,29 @@
 
 Bullet::Bullet()
 {
-	shoot = false;
-	bulletSpeed = 0;
-	bulletX = 0;
-	bulletY = 0;
+	InitBullet();
 }
 
 Bullet::~Bullet()
 {
 }
 
+void Bullet::InitBullet()
+{
+	shoot = false;
+	bulletSpeed = 0;
+	bulletX = 0;
+	bulletY = 0;
+	startX = 0;
+	startY = 0;
+}
+
 void Bullet::DrawBullet()
 {
 	glPushMatrix();
-	glTranslatef(bulletX, bulletY, 0);
+	glTranslatef(startX, startY, 0);
 	glRotatef(angle, 0, 0, 1);
-	glTranslatef(bulletSpeed + 70, 0, 0);
+	glTranslatef(bulletSpeed + 50, 0, 0);
 	glColor3f(1.f, 0.f, 0.f);
 	glBegin(GL_QUADS);
 	glVertex2f(0, 3);
@@ -31,6 +38,8 @@ void Bullet::DrawBullet()
 void Bullet::UpdateSpeed(float speed)
 {
 	bulletSpeed += speed;
+	bulletX = startX + (bulletSpeed + 50) * cos(radian);
+	bulletY = startY + bulletSpeed * sin(radian);
 }
 
 bool Bullet::GetShoot()
@@ -45,11 +54,16 @@ void Bullet::SetShoot(bool shooting)
 
 void Bullet::SetPos(float playerX, float playerY)
 {
-	bulletX = playerX;
-	bulletY = playerY;
+	startX = playerX;
+	startY = playerY;
 }
 
 void Bullet::SetShootAngle(float rotateAngle)
 {
 	angle = rotateAngle;
+}
+
+void Bullet::SetRadian(float rotateradian)
+{
+	radian = rotateradian;
 }
