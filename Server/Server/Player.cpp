@@ -7,6 +7,7 @@ void Player::PlayerInit(SOCKET& sock, int playerID)
 	id = playerID;
 	size = PLAYER_SIZE;
 	hp = 100;
+	radius = (size + 55) / 2;
 	if (playerID == 0)
 	{
 		x = starting_point[0];

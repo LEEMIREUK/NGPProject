@@ -15,6 +15,7 @@ class Player
 	float x;
 	float y;
 	float size;
+	float radius;
 	int hp;
 	bool is_connected;
 	shared_mutex mx;
@@ -29,6 +30,7 @@ public:
 	float GetX() { return x; }
 	float GetY() { return y; }
 	float GetSize() { return size; }
+	float GetRadius() { return radius; }
 	char* GetBuffer() { return recvBuf; }
 	char* GetPacketStartPtr() { return packet_start_ptr; }
 	char* GetRecvStartPtr() { return recv_start_ptr; }

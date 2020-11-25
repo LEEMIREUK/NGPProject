@@ -29,6 +29,35 @@ void error_display(const char* msg, int err_no)
 	LocalFree(lpMsgBuf);
 }
 
+void CollisionPlayerwithMap(int id)
+{
+	float player_x = clients[id].GetX();
+	float player_y = clients[id].GetY();
+	float radius = clients[id].GetRadius();
+
+	if (player_x - radius < 0)
+	{
+		clients[id].SetX(player_x + 4);
+		return;
+	}
+	if (player_x - radius > 1200)
+	{
+		clients[id].SetX(player_x - 4);
+		return;
+	}
+	if (player_y - radius < 0)
+	{
+		clients[id].SetY(player_y + 4);;
+		return;
+	}
+	if (player_y - radius > 800)
+	{
+		clients[id].SetY(player_y - 4);
+		return;
+	}
+
+}
+
 void process_shoot(int id)
 {
 
@@ -48,6 +77,10 @@ void process_packet(int id)
 			cout << fixed;
 			cout.precision(6);
 			cout << elapsed_time.count() << endl;
+
+			// collision player - map
+			CollisionPlayerwithMap(id);
+
 			if (dir == DIR_UP)
 			{	
 				clients[id].ReadLock();
