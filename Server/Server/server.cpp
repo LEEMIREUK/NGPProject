@@ -40,7 +40,7 @@ void CollisionPlayerwithMap(int id)
 		clients[id].SetX(player_x + 4);
 		return;
 	}
-	if (player_x - radius > 1200)
+	if (player_x + radius > 1200)
 	{
 		clients[id].SetX(player_x - 4);
 		return;
@@ -50,7 +50,7 @@ void CollisionPlayerwithMap(int id)
 		clients[id].SetY(player_y + 4);;
 		return;
 	}
-	if (player_y - radius > 800)
+	if (player_y + radius > 800)
 	{
 		clients[id].SetY(player_y - 4);
 		return;
