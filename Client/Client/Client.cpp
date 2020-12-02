@@ -13,7 +13,7 @@ Weapon weapon;
 //Bullet bullet[BULLETCOUNT];
 std::vector<Bullet> bullets;
 Map map;
-Inputs inputs;
+Inputs inputs{ false, false ,false ,false ,false ,false ,false ,false };
 
 int g_prevTimeInMillisecond = 0;
 int shootcount = 0;
@@ -76,13 +76,13 @@ void process_packet(char* packet)
 				bullets[i].SetShootAngle(p->bullets_state[i].angle);
 				bullets[i].SetShootSpeed(p->bullets_state[i].speed);
 			}
-			//for (int i = 0; i < 2; ++i)
-			//{
-			//	if (p->clients_state[i].is_connected && i == myID)
-			//	{
-			//		player.SetPos(p->clients_state[i].x, p->clients_state[i].y);
-			//	}
-			//}
+			for (int i = 0; i < 2; ++i)
+			{
+				if (p->clients_state[i].is_connected)
+				{
+					player[i].SetPos(p->clients_state[i].x, p->clients_state[i].y);
+				}
+			}
 			break;
 		}
 	}
@@ -127,20 +127,32 @@ void KeyDownInput(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w' | 'W':
-		inputs.KEY_W = true;
-		p.dir = DIR_UP;
+		if (!inputs.KEY_W)
+		{
+			inputs.KEY_W = true;
+			p.dir = DIR_UP;
+		}
 		break;
 	case 'a' | 'A':
-		inputs.KEY_A = true;
-		p.dir = DIR_LEFT;
+		if (!inputs.KEY_A)
+		{
+			inputs.KEY_A = true;
+			p.dir = DIR_LEFT;
+		}
 		break;
 	case 's' | 'S':
-		inputs.KEY_S = true;
-		p.dir = DIR_DOWN;
+		if (!inputs.KEY_S)
+		{
+			inputs.KEY_S = true;
+			p.dir = DIR_DOWN;
+		}
 		break;
 	case 'd' | 'D':
-		inputs.KEY_D = true;
-		p.dir = DIR_RIGHT;
+		if (!inputs.KEY_D)
+		{
+			inputs.KEY_D = true;
+			p.dir = DIR_RIGHT;
+		}
 		break;
 	}
 
@@ -149,21 +161,45 @@ void KeyDownInput(unsigned char key, int x, int y)
 
 void KeyUpInput(unsigned char key, int x, int y)
 {
+	CTOS_MOVE p;
+	p.id = myID;
+	p.size = sizeof(p);
+	p.type = ctos_move;
+	p.time = std::chrono::system_clock::now();
+
 	switch (key)
 	{
 	case 'w' | 'W':
-		inputs.KEY_W = false;
+		if (inputs.KEY_W)
+		{
+			inputs.KEY_W = false;
+			p.dir = DIR_UP_UP;
+		}
 		break;
 	case 'a' | 'A':
-		inputs.KEY_A = false;
+		if (inputs.KEY_A)
+		{
+			inputs.KEY_A = false;
+			p.dir = DIR_LEFT_UP;
+		}
 		break;
 	case 's' | 'S':
-		inputs.KEY_S = false;
+		if (inputs.KEY_S)
+		{
+			inputs.KEY_S = false;
+			p.dir = DIR_DOWN_UP;
+		}
 		break;
 	case 'd' | 'D':
-		inputs.KEY_D = false;
+		if (inputs.KEY_D)
+		{
+			inputs.KEY_D = false;
+			p.dir = DIR_RIGHT_UP;
+		}
 		break;
 	}
+
+	send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
 }
 
 void ProcessMouse(int button, int state, int x, int y)

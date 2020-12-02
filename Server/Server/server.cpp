@@ -43,22 +43,26 @@ void CollisionPlayerwithMap(int id)
 
 	if (player_x - radius < 0)
 	{
-		clients[id].SetX(player_x + 4);
+		float over_x = 0.f - (player_x - radius);
+		clients[id].SetX(player_x + over_x);
 		return;
 	}
 	if (player_x + radius > 1200)
 	{
-		clients[id].SetX(player_x - 4);
+		float over_x = (player_x + radius) - 1200.f;
+		clients[id].SetX(player_x - over_x);
 		return;
 	}
 	if (player_y - radius < 0)
 	{
-		clients[id].SetY(player_y + 4);;
+		float over_y = 0.f - (player_y - radius);
+		clients[id].SetY(player_y + over_y);
 		return;
 	}
 	if (player_y + radius > 800)
 	{
-		clients[id].SetY(player_y - 4);
+		float over_y = (player_y + radius) - 800.f;
+		clients[id].SetY(player_y - over_y);
 		return;
 	}
 
@@ -77,60 +81,64 @@ void process_packet(int id)
 			duration<double> elapsed_time = system_clock::now() - p->time;
 
 			// collision player - map
-			CollisionPlayerwithMap(id);
+			//CollisionPlayerwithMap(id);
 
-			if (dir == DIR_UP)
+			if (dir == DIR_UP || dir == DIR_DOWN_UP)
 			{	
-				clients[id].ReadLock();
-				auto curY = clients[id].GetY();
-				clients[id].ReadUnlock();
+				clients[id].SetYSpeed(PLAYER_Y_SPEED);
+				//clients[id].ReadLock();
+				//auto curY = clients[id].GetY();
+				//clients[id].ReadUnlock();
 
-				curY += PLAYER_Y_SPEED * elapsed_time.count();
-				clients[id].WriteLock();
-				clients[id].SetY(curY + 4);
-				clients[id].WriteUnlock();
+				////curY += PLAYER_Y_SPEED * elapsed_time.count();
+				//clients[id].WriteLock();
+				//clients[id].SetY(curY + 4);
+				//clients[id].WriteUnlock();
 			}
-			else if (dir == DIR_DOWN)
+			else if (dir == DIR_DOWN || dir == DIR_UP_UP)
 			{
-				clients[id].ReadLock();
-				auto curY = clients[id].GetY();
-				clients[id].ReadUnlock();
+				clients[id].SetYSpeed(-PLAYER_Y_SPEED);
+				//clients[id].ReadLock();
+				//auto curY = clients[id].GetY();
+				//clients[id].ReadUnlock();
 
-				//curY -= PLAYER_Y_SPEED * elapsed_time.count();
-				clients[id].WriteLock();
-				clients[id].SetY(curY - 4);
-				clients[id].WriteUnlock();
+				////curY -= PLAYER_Y_SPEED * elapsed_time.count();
+				//clients[id].WriteLock();
+				//clients[id].SetY(curY - 4);
+				//clients[id].WriteUnlock();
 			}
-			else if (dir == DIR_LEFT)
+			else if (dir == DIR_LEFT || dir == DIR_RIGHT_UP)
 			{
-				clients[id].ReadLock();
-				auto curX = clients[id].GetX();
-				clients[id].ReadUnlock();
+				clients[id].SetXSpeed(-PLAYER_X_SPEED);
+				//clients[id].ReadLock();
+				//auto curX = clients[id].GetX();
+				//clients[id].ReadUnlock();
 
-				//curX -= PLAYER_X_SPEED * elapsed_time.count();
-				clients[id].WriteLock();
-				clients[id].SetX(curX - 4);
-				clients[id].WriteUnlock();
+				////curX -= PLAYER_X_SPEED * elapsed_time.count();
+				//clients[id].WriteLock();
+				//clients[id].SetX(curX - 4);
+				//clients[id].WriteUnlock();
 			}
-			else if (dir == DIR_RIGHT)
+			else if (dir == DIR_RIGHT || dir == DIR_LEFT_UP)
 			{
-				clients[id].ReadLock();
-				auto curX = clients[id].GetX();
-				clients[id].ReadUnlock();
+				clients[id].SetXSpeed(PLAYER_X_SPEED);
+				//clients[id].ReadLock();
+				//auto curX = clients[id].GetX();
+				//clients[id].ReadUnlock();
 
-				//curX += PLAYER_X_SPEED * elapsed_time.count();
-				clients[id].WriteLock();
-				clients[id].SetX(curX + 4);
-				clients[id].WriteUnlock();
+				////curX += PLAYER_X_SPEED * elapsed_time.count();
+				//clients[id].WriteLock();
+				//clients[id].SetX(curX + 4);
+				//clients[id].WriteUnlock();
 			}
-			STOC_MOVE move_packet;
-			move_packet.id = id;
-			move_packet.size = sizeof(move_packet);
-			move_packet.type = stoc_move;
-			move_packet.x = clients[id].GetX();
-			move_packet.y = clients[id].GetY();
-			for (auto& cl : clients)
-				cl.SendPacket(reinterpret_cast<void*>(&move_packet), sizeof(move_packet));
+			//STOC_MOVE move_packet;
+			//move_packet.id = id;
+			//move_packet.size = sizeof(move_packet);
+			//move_packet.type = stoc_move;
+			//move_packet.x = clients[id].GetX();
+			//move_packet.y = clients[id].GetY();
+			//for (auto& cl : clients)
+			//	cl.SendPacket(reinterpret_cast<void*>(&move_packet), sizeof(move_packet));
 			break;
 		}
 	case ctos_shoot:
@@ -160,6 +168,8 @@ void UpdateAndSendThread()
 			clients[i].ReadLock();
 			if (clients[i].IsConnected())
 			{
+				clients[i].Update(frame_time);
+				CollisionPlayerwithMap(i);
 				p.clients_state[i].hp = clients[i].GetHP();
 				p.clients_state[i].x = clients[i].GetX();
 				p.clients_state[i].y = clients[i].GetY();

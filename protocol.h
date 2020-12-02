@@ -20,15 +20,19 @@
 #define DIR_DOWN 		11
 #define DIR_LEFT 		12
 #define DIR_RIGHT 		13
-#define STRONG_WEAPON	14
-#define NORMAL_WAEPON	15
+#define DIR_UP_UP		14
+#define DIR_DOWN_UP		15
+#define DIR_LEFT_UP 	16
+#define DIR_RIGHT_UP 	17
+#define STRONG_WEAPON	18
+#define NORMAL_WAEPON	19
 ///////////////////////////////////////////////////////////////////////////////
 #define SERVER_PORT 5959
 #define MAX_BUFFER 5120
 ///////////////////////////////////////////////////////////////////////////////
 #define PLAYER_X_SPEED 300.f
 #define PLAYER_Y_SPEED 300.f
-#define BULLET_SPEED 300.f
+#define BULLET_SPEED 500.f
 #define PLAYER_SIZE 25.f
 ///////////////////////////////////////////////////////////////////////////////
 #pragma pack(push, 1)

@@ -23,8 +23,10 @@ void Player::PlayerInit(SOCKET& sock, int playerID)
 	packet_start_ptr = recvBuf;
 }
 
-void Player::Update()
+void Player::Update(std::chrono::duration<double>& time)
 {
+	x += x_speed * time.count();
+	y += y_speed * time.count();
 }
 
 int Player::Recv()

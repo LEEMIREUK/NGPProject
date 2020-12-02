@@ -23,7 +23,7 @@ class Player
 	shared_mutex mx;
 
 public:
-	Player() { is_connected = false; };
+	Player() { is_connected = false; x_speed = 0; y_speed = 0; }
 	~Player() { closesocket(stoc_socket); is_connected = false; }
 	void PlayerInit(SOCKET& sock, int playerID);
 
@@ -44,14 +44,14 @@ public:
 	void SetHP(int playerHP) { hp = playerHP; }
 	void SetX(float xPos) { x = xPos; }
 	void SetY(float yPos) { y = yPos; }
-	void SetXSpeed(float speed) { x_speed = speed; }
-	void SetYSpeed(float speed) { y_speed = speed; }
+	void SetXSpeed(float speed) { x_speed += speed; }
+	void SetYSpeed(float speed) { y_speed += speed; }
 	void SetSize(float playerSize) { size = playerSize; }
 	void SetRecvStart(char* new_start_ptr) { recv_start_ptr = new_start_ptr; };
 	void SetPacketStartPtr(char* new_packet_start_ptr) { packet_start_ptr = new_packet_start_ptr; }
 	void ResetPacketStartPtr() { packet_start_ptr = recv_start_ptr; }
 
-	void Update();
+	void Update(std::chrono::duration<double>& time);
 
 	void ReadLock() { mx.lock_shared(); }
 	void ReadUnlock() { mx.unlock_shared(); }
