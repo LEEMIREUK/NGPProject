@@ -23,6 +23,10 @@ void Player::PlayerInit(SOCKET& sock, int playerID)
 	packet_start_ptr = recvBuf;
 }
 
+void Player::Update()
+{
+}
+
 int Player::Recv()
 {
 	return recv(stoc_socket, recv_start_ptr, MAX_BUFFER, 0);

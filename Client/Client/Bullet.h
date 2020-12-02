@@ -15,6 +15,7 @@ public:
 	void SetPos(float x, float y);
 	void SetShootAngle(float rotateAngle);
 	void SetRadian(float rotateradian);
+	void SetShootSpeed(float speed) { bulletSpeed = speed; }
 private:
 	float bulletSpeed;
 	float startX, startY;

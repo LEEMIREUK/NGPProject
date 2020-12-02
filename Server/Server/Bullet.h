@@ -29,6 +29,7 @@ public:
 	float GetAngle() { return angle; }
 	float GetBulletX() { return bullet_x; }
 	float GetBulletY() { return bullet_y; }
+	float GetSpeed() { return speed; }
 	int GetID() { return id; }
 
 	void SetStartX(float new_x) { start_x = new_x; }
@@ -38,6 +39,6 @@ public:
 	void SetBulletY(float new_y) { bullet_y = new_y; }
 	void SetID(float new_id) { id = new_id; }
 
-	void Update(std::chrono::system_clock::time_point::duration& time);
+	void Update(std::chrono::duration<double>& time);
 };
 

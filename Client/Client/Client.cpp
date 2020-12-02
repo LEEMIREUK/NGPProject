@@ -74,6 +74,7 @@ void process_packet(char* packet)
 			{
 				bullets[i].SetPos(p->bullets_state[i].x, p->bullets_state[i].y);
 				bullets[i].SetShootAngle(p->bullets_state[i].angle);
+				bullets[i].SetShootSpeed(p->bullets_state[i].speed);
 			}
 			//for (int i = 0; i < 2; ++i)
 			//{
@@ -221,7 +222,6 @@ void ProcessMouseMotion(int x, int y)
 
 void display()
 { 
-	std::cout << radian << std::endl;
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
 	int elapsedTime = currentTime - g_prevTimeInMillisecond;
 	g_prevTimeInMillisecond = currentTime;
@@ -274,7 +274,7 @@ void display()
 		//}
 		for (auto& b : bullets)
 		{
-			b.UpdateSpeed(BULLETSPEED * elapsedTimeInSec);
+			//b.UpdateSpeed(BULLETSPEED * elapsedTimeInSec);
 			b.DrawBullet();
 		}
 	glPopMatrix();

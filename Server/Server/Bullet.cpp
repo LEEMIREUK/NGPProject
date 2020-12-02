@@ -1,7 +1,9 @@
 #include "Bullet.h"
 #include "../../protocol.h"
+#include <iostream>
+using namespace std;
 
-void Bullet::Update(std::chrono::system_clock::time_point::duration& time)
+void Bullet::Update(std::chrono::duration<double>& time)
 {
 	speed += BULLET_SPEED * time.count();
 	bullet_x = start_x + (speed + 50) * cos(radian);

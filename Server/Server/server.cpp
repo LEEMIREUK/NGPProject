@@ -85,7 +85,7 @@ void process_packet(int id)
 				auto curY = clients[id].GetY();
 				clients[id].ReadUnlock();
 
-				//curY += PLAYER_Y_SPEED * elapsed_time.count();
+				curY += PLAYER_Y_SPEED * elapsed_time.count();
 				clients[id].WriteLock();
 				clients[id].SetY(curY + 4);
 				clients[id].WriteUnlock();
@@ -152,7 +152,7 @@ void UpdateAndSendThread()
 		p.type = stoc_world_state;
 
 		auto start_time = system_clock::now();
-		auto frame_time = start_time - prev_time;
+		duration<double> frame_time = start_time - prev_time;
 
 		//플레이어 정보 저장
 		for (int i=0;i<2;++i)
@@ -183,6 +183,7 @@ void UpdateAndSendThread()
 			p.bullets_state[i].x = b.GetStartX();
 			p.bullets_state[i].y = b.GetStartY();
 			p.bullets_state[i].angle = b.GetAngle();
+			p.bullets_state[i].speed = b.GetSpeed();
 			i += 1;
 		}
 		p.b_num = i;

@@ -45,6 +45,7 @@ struct BULLET_STATE {
 	float x;
 	float y;
 	float angle;
+	float speed;
 };
 
 //CTOS_*은 CLIENT TO SERVER의 줄임말로, CLIENT에서 SERVER로 보내는 패킷을 의미한다.

@@ -16,6 +16,8 @@ class Player
 	float y;
 	float size;
 	float radius;
+	float x_speed;
+	float y_speed;
 	int hp;
 	bool is_connected;
 	shared_mutex mx;
@@ -29,6 +31,8 @@ public:
 	int GetHP() { return hp; }
 	float GetX() { return x; }
 	float GetY() { return y; }
+	float GetXSpeed() { return x_speed; }
+	float GetYSpeed() { return y_speed; }
 	float GetSize() { return size; }
 	float GetRadius() { return radius; }
 	char* GetBuffer() { return recvBuf; }
@@ -40,10 +44,14 @@ public:
 	void SetHP(int playerHP) { hp = playerHP; }
 	void SetX(float xPos) { x = xPos; }
 	void SetY(float yPos) { y = yPos; }
+	void SetXSpeed(float speed) { x_speed = speed; }
+	void SetYSpeed(float speed) { y_speed = speed; }
 	void SetSize(float playerSize) { size = playerSize; }
 	void SetRecvStart(char* new_start_ptr) { recv_start_ptr = new_start_ptr; };
 	void SetPacketStartPtr(char* new_packet_start_ptr) { packet_start_ptr = new_packet_start_ptr; }
 	void ResetPacketStartPtr() { packet_start_ptr = recv_start_ptr; }
+
+	void Update();
 
 	void ReadLock() { mx.lock_shared(); }
 	void ReadUnlock() { mx.unlock_shared(); }
