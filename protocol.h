@@ -74,7 +74,6 @@ struct CTOS_MOVE{
 	unsigned char type;
 	unsigned char id;
 	unsigned char dir;
-	std::chrono::system_clock::time_point time;
 };
 
 struct CTOS_READY {

@@ -78,67 +78,23 @@ void process_packet(int id)
 		{
 			CTOS_MOVE* p = reinterpret_cast<CTOS_MOVE*>(packet);
 			auto dir = p->dir;
-			duration<double> elapsed_time = system_clock::now() - p->time;
-
-			// collision player - map
-			//CollisionPlayerwithMap(id);
-
+			
 			if (dir == DIR_UP || dir == DIR_DOWN_UP)
 			{	
 				clients[id].SetYSpeed(PLAYER_Y_SPEED);
-				//clients[id].ReadLock();
-				//auto curY = clients[id].GetY();
-				//clients[id].ReadUnlock();
-
-				////curY += PLAYER_Y_SPEED * elapsed_time.count();
-				//clients[id].WriteLock();
-				//clients[id].SetY(curY + 4);
-				//clients[id].WriteUnlock();
 			}
 			else if (dir == DIR_DOWN || dir == DIR_UP_UP)
 			{
 				clients[id].SetYSpeed(-PLAYER_Y_SPEED);
-				//clients[id].ReadLock();
-				//auto curY = clients[id].GetY();
-				//clients[id].ReadUnlock();
-
-				////curY -= PLAYER_Y_SPEED * elapsed_time.count();
-				//clients[id].WriteLock();
-				//clients[id].SetY(curY - 4);
-				//clients[id].WriteUnlock();
 			}
 			else if (dir == DIR_LEFT || dir == DIR_RIGHT_UP)
 			{
 				clients[id].SetXSpeed(-PLAYER_X_SPEED);
-				//clients[id].ReadLock();
-				//auto curX = clients[id].GetX();
-				//clients[id].ReadUnlock();
-
-				////curX -= PLAYER_X_SPEED * elapsed_time.count();
-				//clients[id].WriteLock();
-				//clients[id].SetX(curX - 4);
-				//clients[id].WriteUnlock();
 			}
 			else if (dir == DIR_RIGHT || dir == DIR_LEFT_UP)
 			{
 				clients[id].SetXSpeed(PLAYER_X_SPEED);
-				//clients[id].ReadLock();
-				//auto curX = clients[id].GetX();
-				//clients[id].ReadUnlock();
-
-				////curX += PLAYER_X_SPEED * elapsed_time.count();
-				//clients[id].WriteLock();
-				//clients[id].SetX(curX + 4);
-				//clients[id].WriteUnlock();
 			}
-			//STOC_MOVE move_packet;
-			//move_packet.id = id;
-			//move_packet.size = sizeof(move_packet);
-			//move_packet.type = stoc_move;
-			//move_packet.x = clients[id].GetX();
-			//move_packet.y = clients[id].GetY();
-			//for (auto& cl : clients)
-			//	cl.SendPacket(reinterpret_cast<void*>(&move_packet), sizeof(move_packet));
 			break;
 		}
 	case ctos_shoot:

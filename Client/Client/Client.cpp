@@ -10,7 +10,6 @@
 
 Player player[2];
 Weapon weapon;
-//Bullet bullet[BULLETCOUNT];
 std::vector<Bullet> bullets;
 Map map;
 Inputs inputs{ false, false ,false ,false ,false ,false ,false ,false };
@@ -58,12 +57,6 @@ void process_packet(char* packet)
 			player[p->id].SetPos(p->x, p->y);
 			player[p->id].SetSize(p->player_size);
 			player[p->id].SetConnected(true);
-			break;
-		}
-		case stoc_move:
-		{
-			STOC_MOVE* p = reinterpret_cast<STOC_MOVE*>(packet);
-			player[p->id].SetPos(p->x, p->y);
 			break;
 		}
 		case stoc_world_state:
@@ -122,7 +115,6 @@ void KeyDownInput(unsigned char key, int x, int y)
 	p.id = myID;
 	p.size = sizeof(p);
 	p.type = ctos_move;
-	p.time = std::chrono::system_clock::now();
 
 	switch (key)
 	{
@@ -165,7 +157,6 @@ void KeyUpInput(unsigned char key, int x, int y)
 	p.id = myID;
 	p.size = sizeof(p);
 	p.type = ctos_move;
-	p.time = std::chrono::system_clock::now();
 
 	switch (key)
 	{
@@ -215,17 +206,6 @@ void ProcessMouse(int button, int state, int x, int y)
 		p.size = sizeof(p);
 		p.type = ctos_shoot;
 		send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
-		//// 총알을 쏠때 초기 위치를 잡아줄 플레이어의 좌표 받기
-		//bullet[shootcount].SetPos(player[myID].GetX(), player[myID].GetY());
-		//bullet[shootcount].SetShootAngle(rotate);
-		//bullet[shootcount].SetRadian(radian);
-		//bullet[shootcount].SetShoot(true);
-
-		//if (shootcount > BULLETCOUNT - 1)
-		//{
-		//	shootcount = -1;
-		//}
-		//shootcount += 1;
 	}
 }
 
@@ -243,7 +223,6 @@ void ProcessMouseMotion(int x, int y)
 			radian = atan2(height, width);
 		else
 			radian = atan2(-height, width);
-
 	}
 	else
 	{
@@ -251,7 +230,6 @@ void ProcessMouseMotion(int x, int y)
 			radian = atan2(height, -width);
 		else
 			radian = atan2(-height, -width);
-
 	}
 	rotate = radian * 180 / PI;
 }
@@ -300,19 +278,8 @@ void display()
 	}
 
 	glPushMatrix();
-		//for (int i = 0; i < BULLETCOUNT; ++i)
-		//{
-		//	if (bullet[i].GetShoot())
-		//	{
-		//		bullet[i].UpdateSpeed(BULLETSPEED * elapsedTimeInSec);
-		//		bullet[i].DrawBullet();
-		//	}
-		//}
 		for (auto& b : bullets)
-		{
-			//b.UpdateSpeed(BULLETSPEED * elapsedTimeInSec);
 			b.DrawBullet();
-		}
 	glPopMatrix();
 
 	glPushMatrix();
