@@ -2,7 +2,10 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <vector>
+#include <mutex>
 #include "Player.h"
+#include "Bullet.h"
 #include "../../protocol.h"
 #pragma comment (lib, "ws2_32")
 #define MIN_BUFFER_SIZE 1024
@@ -13,7 +16,10 @@ int user_id = 0;
 int conn_clients = 0;
 Player clients[2];
 CLIENT_STATE clients_state[2];
+vector<Bullet> bullets;
+mutex b_mx;
 float starting_point[4]{ 300.f, 300.f, 900.f, 300.f };
+chrono::system_clock::time_point prev_time;
 
 void error_display(const char* msg, int err_no)
 {
@@ -58,15 +64,10 @@ void CollisionPlayerwithMap(int id)
 
 }
 
-void process_shoot(int id)
-{
-
-}
-
 void process_packet(int id)
 {
 	char* packet = clients[id].GetPacketStartPtr();
-	char type = packet[1];
+	char type = packet[2];
 	switch (type)
 	{
 	case ctos_move:
@@ -74,9 +75,6 @@ void process_packet(int id)
 			CTOS_MOVE* p = reinterpret_cast<CTOS_MOVE*>(packet);
 			auto dir = p->dir;
 			duration<double> elapsed_time = system_clock::now() - p->time;
-			cout << fixed;
-			cout.precision(6);
-			cout << elapsed_time.count() << endl;
 
 			// collision player - map
 			CollisionPlayerwithMap(id);
@@ -137,7 +135,10 @@ void process_packet(int id)
 		}
 	case ctos_shoot:
 		{
-			process_shoot(id);
+			CTOS_SHOOT* p = reinterpret_cast<CTOS_SHOOT*> (packet);
+			b_mx.lock();
+			bullets.emplace_back(p->x, p->y, p->angle, p->radian, p->id);
+			b_mx.unlock();
 			break;
 		}
 	}
@@ -147,10 +148,13 @@ void UpdateAndSendThread()
 {
 	while (true)
 	{
-		auto start_time = system_clock::now();
 		STOC_WORLD_STATE p;
-		p.size = sizeof(p);
 		p.type = stoc_world_state;
+
+		auto start_time = system_clock::now();
+		auto frame_time = start_time - prev_time;
+
+		//플레이어 정보 저장
 		for (int i=0;i<2;++i)
 		{
 			clients[i].ReadLock();
@@ -171,10 +175,28 @@ void UpdateAndSendThread()
 			clients[i].ReadUnlock();
 		}
 
+		//총알정보 업데이트 및 저장
+		int i = 0;
+		for (auto& b : bullets)
+		{
+			b.Update(frame_time);
+			p.bullets_state[i].x = b.GetStartX();
+			p.bullets_state[i].y = b.GetStartY();
+			p.bullets_state[i].angle = b.GetAngle();
+			i += 1;
+		}
+		p.b_num = i;
+		p.size = sizeof(p) - (sizeof(BULLET_STATE) * (200 - i));
+
+		//전송
 		for (auto& cl : clients)
-			cl.SendPacket(reinterpret_cast<void*>(&p), sizeof(p));
+			cl.SendPacket(reinterpret_cast<void*>(&p), p.size);
+
 		auto end_time = system_clock::now();
+		prev_time = end_time;
+
 		auto elapsed_time = duration_cast<milliseconds>(end_time - start_time);
+
 		this_thread::sleep_for(16ms - elapsed_time);
 	}
 }
@@ -186,17 +208,23 @@ void RecvThread(int id)
 		int recv_bytes = clients[id].Recv();
 		if (recv_bytes == 0)
 		{
-			clients[id].~Player();
+			//closesocket
 		}
 		else if (recv_bytes == SOCKET_ERROR)
 		{
+			if (WSAGetLastError() == 10054)
+			{
+				clients[id].~Player();
+				conn_clients -= 1;
+				return;
+			}
 			string error_str = "Player" + to_string(id) + "recv error";
 			error_display(error_str.c_str(), WSAGetLastError());
 		}
 		else
 		{
 			char* buf = clients[id].GetPacketStartPtr();
-			unsigned char p_size = buf[0];
+			short p_size = *reinterpret_cast<short*>(&buf[0]);
 			char* next_recv_point = clients[id].GetRecvStartPtr() + recv_bytes;
 			while (p_size <= next_recv_point - buf)
 			{
@@ -206,7 +234,7 @@ void RecvThread(int id)
 
 				//여러개의 패킷이 한번에 수신된 상황일 경우 다음 패킷의 크기를 구한다.
 				if (buf < next_recv_point)
-					p_size = buf[0];
+					p_size = *reinterpret_cast<short*>(&buf[0]);
 				else break;
 			}
 
@@ -231,9 +259,10 @@ int main()
 {
 	//display_error호출 시 정상적으로 한글 출력을 하기 위함.
 	std::wcout.imbue(std::locale("korean"));
-
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
+
+	bullets.reserve(10000);
 
 	SOCKET lSocket = socket(AF_INET, SOCK_STREAM, 0);
 	sockaddr_in sockAddr;
@@ -243,7 +272,8 @@ int main()
 	::bind(lSocket, (SOCKADDR*)&sockAddr, sizeof(sockAddr));
 	listen(lSocket, SOMAXCONN);
 
-	//auto update_thread = thread{ UpdateAndSendThread };
+	prev_time = chrono::system_clock::now();
+	auto update_thread = thread{ UpdateAndSendThread };
 	thread recv_thread[2];
 	sockaddr_in stoc_sockAddr;
 	int addrSize = sizeof(stoc_sockAddr);
@@ -307,7 +337,7 @@ int main()
 	//다른 스레드가 종료될 때 까지 기다린다.
 	for (auto& th : recv_thread)
 		th.join();
-	//update_thread.join();
+	update_thread.join();
 
 	WSACleanup();
 }

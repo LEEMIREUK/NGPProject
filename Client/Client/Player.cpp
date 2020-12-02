@@ -86,12 +86,12 @@ bool Player::GetConnected()
 	return m_connected;
 }
 
-int Player::GetX()
+float Player::GetX()
 {
 	return m_PositionX;
 }
 
-int Player::GetY()
+float Player::GetY()
 {
 	return m_PositionY;
 }

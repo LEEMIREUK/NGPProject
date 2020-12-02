@@ -28,6 +28,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #define PLAYER_X_SPEED 300.f
 #define PLAYER_Y_SPEED 300.f
+#define BULLET_SPEED 300.f
 #define PLAYER_SIZE 25.f
 ///////////////////////////////////////////////////////////////////////////////
 #pragma pack(push, 1)
@@ -40,23 +41,31 @@ struct CLIENT_STATE {
 	bool is_connected;
 };
 
+struct BULLET_STATE {
+	float x;
+	float y;
+	float angle;
+};
+
 //CTOS_*은 CLIENT TO SERVER의 줄임말로, CLIENT에서 SERVER로 보내는 패킷을 의미한다.
 //STOC_*은 SERVER TO CLIENT의 줄임말로, SERVER에서 CLIENT로 보내는 패킷을 의미한다.
 struct CTOS_LOGIN {
-	unsigned char size;
+	short size;
 	unsigned char type;
 };
 
 struct CTOS_SHOOT {
-	unsigned char size;
+	short size;
 	unsigned char type;
 	unsigned char id;
-	unsigned char weapon_type;
-	unsigned char dir;
+	float x;
+	float y;
+	float angle;
+	float radian;
 };
 
 struct CTOS_MOVE{
-	unsigned char size;
+	short size;
 	unsigned char type;
 	unsigned char id;
 	unsigned char dir;
@@ -64,20 +73,20 @@ struct CTOS_MOVE{
 };
 
 struct CTOS_READY {
-	unsigned char size;
+	short size;
 	unsigned char type;
 	unsigned char id;
 };
 
 struct CTOS_WEAPON_SELECT {
-	unsigned char size;
+	short size;
 	unsigned char type;
 	unsigned char id;
 	unsigned char weapon_type;
 };
 
 struct STOC_LOGIN_OK {
-	unsigned char size;
+	short size;
 	unsigned char type;
 	unsigned char id;
 	float x;
@@ -86,7 +95,7 @@ struct STOC_LOGIN_OK {
 };
 
 struct STOC_NEW_CLIENT {
-	unsigned char size;
+	short size;
 	unsigned char type;
 	unsigned char id;
 	float x;
@@ -95,7 +104,7 @@ struct STOC_NEW_CLIENT {
 };
 
 struct STOC_MOVE {
-	unsigned char size;
+	short size;
 	unsigned char type;
 	unsigned char id;
 	float x;
@@ -103,39 +112,41 @@ struct STOC_MOVE {
 };
 
 struct STOC_HIT {
-	unsigned char size;
+	short size;
 	unsigned char type;
 	unsigned char id;
 	unsigned char hp;
 };
 
 struct STOC_BULLETS_INFO {
-	unsigned char size;
+	short size;
 	unsigned char type;
 };
 
 struct STOC_READY {
-	unsigned char size;
+	short size;
 	unsigned char type;
 	unsigned char id;
 };
 
 struct STOC_GAMESTART {
-	unsigned char size;
+	short size;
 	unsigned char type;
 };
 
 struct STOC_WEAPON_SELECT {
-	unsigned char size;
+	short size;
 	unsigned char type;
 	unsigned char id;
 	unsigned char weapon_type;
 };
 
 struct STOC_WORLD_STATE {
-	unsigned char size;
+	short size;
 	unsigned char type;
+	unsigned char b_num;
 	CLIENT_STATE clients_state[2];
+	BULLET_STATE bullets_state[200];
 };
 #pragma pack(pop)
 ///////////////////////////////////////////////////////////////////////////////

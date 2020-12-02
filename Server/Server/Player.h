@@ -22,7 +22,7 @@ class Player
 
 public:
 	Player() { is_connected = false; };
-	~Player() { closesocket(stoc_socket); }
+	~Player() { closesocket(stoc_socket); is_connected = false; }
 	void PlayerInit(SOCKET& sock, int playerID);
 
 	int GetID() { return id; }

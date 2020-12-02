@@ -1,5 +1,6 @@
 #include <WS2tcpip.h>
 #include <iostream>
+#include <vector>
 #pragma comment (lib, "ws2_32")
 #include "Player.h"
 #include "Weapon.h"
@@ -9,7 +10,8 @@
 
 Player player[2];
 Weapon weapon;
-Bullet bullet[BULLETCOUNT];
+//Bullet bullet[BULLETCOUNT];
+std::vector<Bullet> bullets;
 Map map;
 Inputs inputs;
 
@@ -39,7 +41,7 @@ void error_display(const char* msg, int err_no)
 
 void process_packet(char* packet)
 {
-	switch (packet[1])
+	switch (packet[2])
 	{
 		case stoc_login_ok:
 		{
@@ -67,13 +69,19 @@ void process_packet(char* packet)
 		case stoc_world_state:
 		{
 			STOC_WORLD_STATE* p = reinterpret_cast<STOC_WORLD_STATE*>(packet);
-			for (int i = 0; i < 2; ++i)
+			bullets.resize(p->b_num);
+			for (int i = 0; i < p->b_num; ++i)
 			{
-				if (p->clients_state[i].is_connected && i == myID)
-				{
-					//player.SetPos(p->clients_state[i].x, p->clients_state[i].y);
-				}
+				bullets[i].SetPos(p->bullets_state[i].x, p->bullets_state[i].y);
+				bullets[i].SetShootAngle(p->bullets_state[i].angle);
 			}
+			//for (int i = 0; i < 2; ++i)
+			//{
+			//	if (p->clients_state[i].is_connected && i == myID)
+			//	{
+			//		player.SetPos(p->clients_state[i].x, p->clients_state[i].y);
+			//	}
+			//}
 			break;
 		}
 	}
@@ -88,7 +96,7 @@ void process_recv(int recv_bytes)
 
 	while (0 != recv_bytes)
 	{
-		if (0 == in_packet_size) in_packet_size = ptr[0];
+		if (0 == in_packet_size) in_packet_size = *(reinterpret_cast<short*>(&ptr[0]));
 		if (recv_bytes + saved_packet_size >= in_packet_size)
 		{
 			memcpy(packet_buffer + saved_packet_size, ptr, in_packet_size - saved_packet_size);
@@ -161,17 +169,26 @@ void ProcessMouse(int button, int state, int x, int y)
 {
 	if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN))
 	{
-		// 총알을 쏠때 초기 위치를 잡아줄 플레이어의 좌표 받기
-		bullet[shootcount].SetPos(player[myID].GetX(), player[myID].GetY());
-		bullet[shootcount].SetShootAngle(rotate);
-		bullet[shootcount].SetRadian(radian);
-		bullet[shootcount].SetShoot(true);
+		CTOS_SHOOT p;
+		p.x = player[myID].GetX();
+		p.y = player[myID].GetY();
+		p.radian = radian;
+		p.angle = rotate;
+		p.id = myID;
+		p.size = sizeof(p);
+		p.type = ctos_shoot;
+		send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
+		//// 총알을 쏠때 초기 위치를 잡아줄 플레이어의 좌표 받기
+		//bullet[shootcount].SetPos(player[myID].GetX(), player[myID].GetY());
+		//bullet[shootcount].SetShootAngle(rotate);
+		//bullet[shootcount].SetRadian(radian);
+		//bullet[shootcount].SetShoot(true);
 
-		if (shootcount > BULLETCOUNT - 1)
-		{
-			shootcount = -1;
-		}
-		shootcount += 1;
+		//if (shootcount > BULLETCOUNT - 1)
+		//{
+		//	shootcount = -1;
+		//}
+		//shootcount += 1;
 	}
 }
 
@@ -204,6 +221,7 @@ void ProcessMouseMotion(int x, int y)
 
 void display()
 { 
+	std::cout << radian << std::endl;
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
 	int elapsedTime = currentTime - g_prevTimeInMillisecond;
 	g_prevTimeInMillisecond = currentTime;
@@ -246,13 +264,18 @@ void display()
 	}
 
 	glPushMatrix();
-		for (int i = 0; i < BULLETCOUNT; ++i)
+		//for (int i = 0; i < BULLETCOUNT; ++i)
+		//{
+		//	if (bullet[i].GetShoot())
+		//	{
+		//		bullet[i].UpdateSpeed(BULLETSPEED * elapsedTimeInSec);
+		//		bullet[i].DrawBullet();
+		//	}
+		//}
+		for (auto& b : bullets)
 		{
-			if (bullet[i].GetShoot())
-			{
-				bullet[i].UpdateSpeed(BULLETSPEED * elapsedTimeInSec);
-				bullet[i].DrawBullet();
-			}
+			b.UpdateSpeed(BULLETSPEED * elapsedTimeInSec);
+			b.DrawBullet();
 		}
 	glPopMatrix();
 
@@ -322,6 +345,9 @@ void InitOpenGL(int argc, char** argv)
 int main(int argc, char** argv)
 {
 	std::wcout.imbue(std::locale("korean"));
+	bullets.reserve(100);
 	InitOpenGL(argc, argv);
+	closesocket(cSocket);
+	WSACleanup();
 	return 0;
 }

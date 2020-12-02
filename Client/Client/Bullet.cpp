@@ -1,4 +1,5 @@
 #include "Bullet.h"
+#include "../../protocol.h"
 
 Bullet::Bullet()
 {
@@ -24,7 +25,7 @@ void Bullet::DrawBullet()
 	glPushMatrix();
 	glTranslatef(startX, startY, 0);
 	glRotatef(angle, 0, 0, 1);
-	glTranslatef(bulletSpeed + 50, 0, 0);
+	glTranslatef(BULLETSPEED + 50, 0, 0);
 	glColor3f(1.f, 0.f, 0.f);
 	glBegin(GL_QUADS);
 	glVertex2f(0, 3);

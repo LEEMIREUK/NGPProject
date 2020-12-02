@@ -16,8 +16,8 @@ public:
 	void GetPos(float* x, float* y);
 	void GetSize(float* size);
 	bool GetConnected();
-	int GetX();
-	int GetY();
+	float GetX();
+	float GetY();
 private:
 	float m_PositionX, m_PositionY;
 	float m_Size;
