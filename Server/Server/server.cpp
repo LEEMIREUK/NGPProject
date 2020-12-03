@@ -71,7 +71,7 @@ void CollisionBulletwithPlayer(int id)
 {
 	float bullet_x = bullets[id].GetBulletX();
 	float bullet_y = bullets[id].GetBulletY();
-	float radian = bullets[id].GetRadian();
+	float radian = clients[id].GetRotate();
 
 	float player_x = clients[id].GetX();
 	float player_y = clients[id].GetY();
@@ -79,12 +79,8 @@ void CollisionBulletwithPlayer(int id)
 
 	float distance = sqrt(pow((bullet_x + radian) - (player_x + radius), 2) + pow((bullet_y + radian) - (player_y + radius), 2));
 
-	std::cout  << bullet_x << std::endl;
-
-//	std::cout << radian << "," << radius << "," << distance << std::endl;
-	//if (distance < radian + radius)
+	//if (distance < radius)
 	//{
-	//	return;
 	//	std::cout << "Ãæµ¹ " << std::endl;
 	//}
 	//else

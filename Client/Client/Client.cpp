@@ -8,6 +8,7 @@
 #include "Map.h"
 #include "../../protocol.h"
 
+std::string ip;
 Player player[2];
 
 Weapon weapon;
@@ -312,7 +313,7 @@ void InitOpenGL(int argc, char** argv)
 	cSocket = socket(AF_INET, SOCK_STREAM, 0);
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = htons(SERVER_PORT);
-	sockAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	sockAddr.sin_addr.s_addr = inet_addr(ip.c_str());
 	int conn_result = connect(cSocket, (SOCKADDR*)&sockAddr, sizeof(sockAddr));
 
 	if (conn_result == 0)
@@ -347,7 +348,6 @@ void InitOpenGL(int argc, char** argv)
 		glClearColor(1.f, 1.f, 1.f, 0.f);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		//gluOrtho2D(-WIDTH / 2, WIDTH / 2, -HEIGHT / 2, HEIGHT / 2);
 		gluOrtho2D(0, WIDTH, 0, HEIGHT);
 
 		glutMainLoop();
@@ -357,6 +357,14 @@ void InitOpenGL(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
+	// 立加
+	std::cout << "******************************" << std::endl;
+	std::cout << "         Shooting Nemo        " << std::endl;
+	std::cout << "******************************" << std::endl;
+	std::cout << "Server IP 林家甫 涝仿秦 林技夸: ";
+	std::cin >> ip;
+
+
 	std::wcout.imbue(std::locale("korean"));
 	bullets.reserve(100);
 	InitOpenGL(argc, argv);
