@@ -105,6 +105,12 @@ void process_packet(int id)
 			b_mx.unlock();
 			break;
 		}
+	case ctos_rotate:
+		{
+			CTOS_ROTATE* p = reinterpret_cast<CTOS_ROTATE*> (packet);
+			clients[p->id].SetRotate(p->rotate);
+			break;
+		}
 	}
 }
 
@@ -130,6 +136,7 @@ void UpdateAndSendThread()
 				p.clients_state[i].x = clients[i].GetX();
 				p.clients_state[i].y = clients[i].GetY();
 				p.clients_state[i].is_connected = true;
+				p.clients_state[i].rotate = clients[i].GetRotate();
 			}
 			else
 			{
@@ -137,6 +144,7 @@ void UpdateAndSendThread()
 				p.clients_state[i].x = NULL;
 				p.clients_state[i].y = NULL;
 				p.clients_state[i].is_connected = false;
+				p.clients_state[i].rotate = NULL;
 			}
 			clients[i].ReadUnlock();
 		}

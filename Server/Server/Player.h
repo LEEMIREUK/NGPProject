@@ -22,6 +22,8 @@ class Player
 	bool is_connected;
 	shared_mutex mx;
 
+	float m_Rotate;
+
 public:
 	Player() { is_connected = false; x_speed = 0; y_speed = 0; }
 	~Player() { closesocket(stoc_socket); is_connected = false; }
@@ -60,5 +62,8 @@ public:
 
 	int Recv();
 	int SendPacket(void* packet, int p_size);
+
+	void SetRotate(float rotate) { m_Rotate = rotate; }
+	float GetRotate() { return m_Rotate; }
 };
 

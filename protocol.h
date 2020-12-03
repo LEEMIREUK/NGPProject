@@ -15,6 +15,7 @@
 #define stoc_weapon_select	32
 #define stoc_world_state	33
 #define stoc_login_ok		34
+#define ctos_rotate			35
 ///////////////////////////////////////////////////////////////////////////////
 #define DIR_UP			10
 #define DIR_DOWN 		11
@@ -43,6 +44,7 @@ struct CLIENT_STATE {
 	float y;
 	int hp;
 	bool is_connected;
+	float rotate;
 };
 
 struct BULLET_STATE {
@@ -74,6 +76,13 @@ struct CTOS_MOVE{
 	unsigned char type;
 	unsigned char id;
 	unsigned char dir;
+};
+
+struct CTOS_ROTATE {
+	short size;
+	unsigned char type;
+	unsigned char id;
+	float rotate;
 };
 
 struct CTOS_READY {

@@ -95,3 +95,13 @@ float Player::GetY()
 {
 	return m_PositionY;
 }
+
+void Player::SetRotate(float rotate)
+{
+	m_Rotate = rotate;
+}
+
+float Player::GetRotate()
+{
+	return m_Rotate;
+}

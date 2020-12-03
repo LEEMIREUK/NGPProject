@@ -18,6 +18,9 @@ public:
 	bool GetConnected();
 	float GetX();
 	float GetY();
+
+	void SetRotate(float rotate);
+	float GetRotate();
 private:
 	float m_PositionX, m_PositionY;
 	float m_Size;
@@ -29,4 +32,6 @@ private:
 	float m_Speed_Y;
 	int	  m_PlayerID;
 	bool  m_connected;
+
+	float m_Rotate;
 };

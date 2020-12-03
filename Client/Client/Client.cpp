@@ -9,6 +9,7 @@
 #include "../../protocol.h"
 
 Player player[2];
+
 Weapon weapon;
 std::vector<Bullet> bullets;
 Map map;
@@ -16,7 +17,7 @@ Inputs inputs{ false, false ,false ,false ,false ,false ,false ,false };
 
 int g_prevTimeInMillisecond = 0;
 int shootcount = 0;
-float rotate = 0;
+//float rotate = 0;
 float radian = 0;
 char recvBuffer[MAX_BUFFER];
 int myID;
@@ -74,6 +75,7 @@ void process_packet(char* packet)
 				if (p->clients_state[i].is_connected)
 				{
 					player[i].SetPos(p->clients_state[i].x, p->clients_state[i].y);
+					player[i].SetRotate(p->clients_state[i].rotate);
 				}
 			}
 			break;
@@ -201,7 +203,7 @@ void ProcessMouse(int button, int state, int x, int y)
 		p.x = player[myID].GetX();
 		p.y = player[myID].GetY();
 		p.radian = radian;
-		p.angle = rotate;
+		p.angle = player[myID].GetRotate();
 		p.id = myID;
 		p.size = sizeof(p);
 		p.type = ctos_shoot;
@@ -217,6 +219,11 @@ void ProcessMouseMotion(int x, int y)
 	float height = fabs(my - player[myID].GetY());
 	float radian;
 
+	CTOS_ROTATE p;
+	p.id = myID;
+	p.size = sizeof(p);
+	p.type = ctos_rotate;
+
 	if (player[myID].GetX() < mx)
 	{
 		if (player[myID].GetY() < my)
@@ -231,7 +238,10 @@ void ProcessMouseMotion(int x, int y)
 		else
 			radian = atan2(-height, -width);
 	}
-	rotate = radian * 180 / PI;
+	player[myID].SetRotate(radian * 180 / PI);
+
+	p.rotate = player[myID].GetRotate();
+	send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
 }
 
 void display()
@@ -267,7 +277,7 @@ void display()
 		{
 			glPushMatrix();
 			glTranslatef(p.GetX(), p.GetY(), 0);
-			glRotatef(rotate, 0, 0, 1);
+			glRotatef(p.GetRotate(), 0, 0, 1);
 			glTranslatef(-p.GetX(), -p.GetY(), 0);
 			glPushMatrix();
 			p.DrawPlayer();
