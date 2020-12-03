@@ -36,6 +36,7 @@ public:
 	float GetXSpeed() { return x_speed; }
 	float GetYSpeed() { return y_speed; }
 	float GetSize() { return size; }
+	float GetRotate() { return m_Rotate; }
 	float GetRadius() { return radius; }
 	char* GetBuffer() { return recvBuf; }
 	char* GetPacketStartPtr() { return packet_start_ptr; }
@@ -49,6 +50,7 @@ public:
 	void SetXSpeed(float speed) { x_speed += speed; }
 	void SetYSpeed(float speed) { y_speed += speed; }
 	void SetSize(float playerSize) { size = playerSize; }
+	void SetRotate(float rotate) { m_Rotate = rotate; }
 	void SetRecvStart(char* new_start_ptr) { recv_start_ptr = new_start_ptr; };
 	void SetPacketStartPtr(char* new_packet_start_ptr) { packet_start_ptr = new_packet_start_ptr; }
 	void ResetPacketStartPtr() { packet_start_ptr = recv_start_ptr; }
@@ -62,8 +64,5 @@ public:
 
 	int Recv();
 	int SendPacket(void* packet, int p_size);
-
-	void SetRotate(float rotate) { m_Rotate = rotate; }
-	float GetRotate() { return m_Rotate; }
 };
 

@@ -65,7 +65,49 @@ void CollisionPlayerwithMap(int id)
 		clients[id].SetY(player_y - over_y);
 		return;
 	}
+}
 
+void CollisionBulletwithPlayer(int id)
+{
+	float bullet_x = bullets[id].GetBulletX();
+	float bullet_y = bullets[id].GetBulletY();
+	float radian = bullets[id].GetRadian();
+
+	float player_x = clients[id].GetX();
+	float player_y = clients[id].GetY();
+	float radius = clients[id].GetRadius();
+
+	float distance = sqrt(pow((bullet_x + radian) - (player_x + radius), 2) + pow((bullet_y + radian) - (player_y + radius), 2));
+
+	std::cout  << bullet_x << std::endl;
+
+//	std::cout << radian << "," << radius << "," << distance << std::endl;
+	//if (distance < radian + radius)
+	//{
+	//	return;
+	//	std::cout << "Ãæµ¹ " << std::endl;
+	//}
+	//else
+	//{
+	//	return;
+	//	std::cout << "no" << std::endl;
+	//}
+	//if (bullet_x - radian < 0)
+	//{
+	//	return;
+	//}
+	//if (bullet_x + radian > 1200)
+	//{
+	//	return;
+	//}
+	//if (bullet_y - radian < 0)
+	//{
+	//	return;
+	//}
+	//if (bullet_y - radian > 800)
+	//{
+	//	return;
+	//}
 }
 
 void process_packet(int id)
@@ -154,6 +196,7 @@ void UpdateAndSendThread()
 		for (auto& b : bullets)
 		{
 			b.Update(frame_time);
+			CollisionBulletwithPlayer(i);
 			p.bullets_state[i].x = b.GetStartX();
 			p.bullets_state[i].y = b.GetStartY();
 			p.bullets_state[i].angle = b.GetAngle();
