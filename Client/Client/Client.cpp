@@ -18,7 +18,6 @@ Inputs inputs{ false, false ,false ,false ,false ,false ,false ,false };
 
 int g_prevTimeInMillisecond = 0;
 int shootcount = 0;
-//float rotate = 0;
 float radian = 0;
 char recvBuffer[MAX_BUFFER];
 int myID;
@@ -218,7 +217,6 @@ void ProcessMouseMotion(int x, int y)
 	float my = HEIGHT - y;
 	float width = fabs(mx - player[myID].GetX());
 	float height = fabs(my - player[myID].GetY());
-	float radian;
 
 	CTOS_ROTATE p;
 	p.id = myID;

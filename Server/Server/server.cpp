@@ -69,17 +69,19 @@ void CollisionPlayerwithMap(int id)
 
 void CollisionBulletwithPlayer(int id)
 {
+	int other_id = 1 - id;
+
 	float bullet_x = bullets[id].GetBulletX();
 	float bullet_y = bullets[id].GetBulletY();
-	float radian = clients[id].GetRotate();
+	float radian = bullets[id].GetRadian();
 
-	float player_x = clients[id].GetX();
-	float player_y = clients[id].GetY();
-	float radius = clients[id].GetRadius();
+	float player_x = clients[other_id].GetX();
+	float player_y = clients[other_id].GetY();
+	float radius = clients[other_id].GetRadius();
 
-	float distance = sqrt(pow((bullet_x + radian) - (player_x + radius), 2) + pow((bullet_y + radian) - (player_y + radius), 2));
+	float distance = sqrt(pow((bullet_x) - (player_x + radius), 2) + pow((bullet_y) - (player_y + radius), 2));
 
-	//if (distance < radius)
+	//if (distance < player_x)
 	//{
 	//	std::cout << "Ãæµ¹ " << std::endl;
 	//}
