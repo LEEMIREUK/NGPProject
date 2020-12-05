@@ -167,7 +167,7 @@ void UpdateAndSendThread()
 		//플레이어 정보 저장
 		for (int i=0;i<2;++i)
 		{
-			clients[i].ReadLock();
+			clients[i].Lock();
 			if (clients[i].IsConnected())
 			{
 				clients[i].Update(frame_time);
@@ -186,7 +186,7 @@ void UpdateAndSendThread()
 				p.clients_state[i].is_connected = false;
 				p.clients_state[i].rotate = NULL;
 			}
-			clients[i].ReadUnlock();
+			clients[i].Unlock();
 		}
 
 		//총알정보 업데이트 및 저장
@@ -201,8 +201,13 @@ void UpdateAndSendThread()
 			p.bullets_state[i].speed = b.GetSpeed();
 			i += 1;
 		}
-		p.b_num = i;
-		p.size = sizeof(p) - (sizeof(BULLET_STATE) * (200 - i));
+		bullets.erase(remove_if(bullets.begin(),
+								bullets.end(),
+								[](Bullet& b) {return !b.GetActive(); }),
+					  bullets.end());
+		cout << bullets.size() << endl;
+		p.b_num = bullets.size();
+		p.size = sizeof(p) - (sizeof(BULLET_STATE) * (200 - p.b_num));
 
 		//전송
 		for (auto& cl : clients)

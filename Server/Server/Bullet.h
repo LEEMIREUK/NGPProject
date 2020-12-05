@@ -9,6 +9,7 @@ class Bullet
 	float bullet_x, bullet_y;
 	float speed;
 	int id;
+	bool active;
 public:
 	Bullet();
 	Bullet(float x, float y, float ang, float rad, int shooter)
@@ -21,6 +22,7 @@ public:
 		bullet_x = 0.f;
 		bullet_y = 0.f;
 		speed = 0;
+		active = true;
 	}
 	~Bullet() {}
 
@@ -32,6 +34,7 @@ public:
 	float GetSpeed() { return speed; }
 	float GetRadian() { return radian; }
 	int GetID() { return id; }
+	bool GetActive() { return active; }
 
 	void SetStartX(float new_x) { start_x = new_x; }
 	void SetStartY(float new_y) { start_y = new_y; }

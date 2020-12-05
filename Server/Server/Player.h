@@ -1,6 +1,6 @@
 #pragma once
 #include <WS2tcpip.h>
-#include <shared_mutex>
+#include <mutex>
 #include "../../protocol.h"
 using namespace std;
 
@@ -20,7 +20,7 @@ class Player
 	float y_speed;
 	int hp;
 	bool is_connected;
-	shared_mutex mx;
+	mutex mx;
 
 	float m_Rotate;
 
@@ -57,10 +57,8 @@ public:
 
 	void Update(std::chrono::duration<double>& time);
 
-	void ReadLock() { mx.lock_shared(); }
-	void ReadUnlock() { mx.unlock_shared(); }
-	void WriteLock() { mx.lock(); }
-	void WriteUnlock() { mx.unlock(); }
+	void Lock() { mx.lock(); }
+	void Unlock() { mx.unlock(); }
 
 	int Recv();
 	int SendPacket(void* packet, int p_size);
