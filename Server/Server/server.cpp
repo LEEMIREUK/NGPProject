@@ -205,7 +205,6 @@ void UpdateAndSendThread()
 								bullets.end(),
 								[](Bullet& b) {return !b.GetActive(); }),
 					  bullets.end());
-		cout << bullets.size() << endl;
 		p.b_num = bullets.size();
 		p.size = sizeof(p) - (sizeof(BULLET_STATE) * (200 - p.b_num));
 
@@ -239,8 +238,8 @@ void RecvThread(int id)
 				conn_clients -= 1;
 				return;
 			}
-			string error_str = "Player" + to_string(id) + "recv error";
-			error_display(error_str.c_str(), WSAGetLastError());
+			//string error_str = "Player" + to_string(id) + "recv error";
+			//error_display(error_str.c_str(), WSAGetLastError());
 		}
 		else
 		{
