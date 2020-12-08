@@ -12,6 +12,8 @@
 using namespace std;
 using namespace chrono;
 
+int count1;
+
 int user_id = 0;
 int conn_clients = 0;
 Player clients[2];
@@ -81,15 +83,15 @@ void CollisionBulletwithPlayer(int id)
 
 	float distance = sqrt(pow((bullet_x) - (player_x + radius), 2) + pow((bullet_y) - (player_y + radius), 2));
 
-	//if (distance < player_x)
+
+	//if (distance < radius)
 	//{
-	//	std::cout << "Ãæµ¹ " << std::endl;
+	//	std::cout << count1 << std::endl;
+	//	count1++;
 	//}
-	//else
-	//{
-	//	return;
-	//	std::cout << "no" << std::endl;
-	//}
+
+	std::cout << bullet_x << " -- " << bullet_y << std::endl;
+
 	//if (bullet_x - radian < 0)
 	//{
 	//	return;
@@ -194,7 +196,7 @@ void UpdateAndSendThread()
 		for (auto& b : bullets)
 		{
 			b.Update(frame_time);
-			CollisionBulletwithPlayer(i);
+			CollisionBulletwithPlayer(b.GetID());
 			p.bullets_state[i].x = b.GetStartX();
 			p.bullets_state[i].y = b.GetStartY();
 			p.bullets_state[i].angle = b.GetAngle();
