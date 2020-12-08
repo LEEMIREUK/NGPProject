@@ -21,6 +21,10 @@ int shootcount = 0;
 float radian = 0;
 char recvBuffer[MAX_BUFFER];
 int myID;
+bool show_winner = false;
+bool get_ready = false;
+bool game_start = false;
+int winner_id;
 
 SOCKET cSocket;
 sockaddr_in sockAddr;
@@ -80,6 +84,24 @@ void process_packet(char* packet)
 			}
 			break;
 		}
+
+		case stoc_gameend:
+		{
+			STOC_GAMEEND* p = reinterpret_cast<STOC_GAMEEND*>(packet);
+			show_winner = true;
+			game_start = false;
+			winner_id = p->winner_id;
+			bullets.clear();
+			break;
+		}
+
+		case stoc_gamestart:
+		{
+			game_start = true;
+			get_ready = false;
+			show_winner = false;
+			break;
+		}
 	}
 }
 
@@ -121,36 +143,51 @@ void KeyDownInput(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w' | 'W':
-		if (!inputs.KEY_W)
+		if (!inputs.KEY_W && game_start)
 		{
 			inputs.KEY_W = true;
 			p.dir = DIR_UP;
+			send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
 		}
 		break;
 	case 'a' | 'A':
-		if (!inputs.KEY_A)
+		if (!inputs.KEY_A && game_start)
 		{
 			inputs.KEY_A = true;
 			p.dir = DIR_LEFT;
+			send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
 		}
 		break;
 	case 's' | 'S':
-		if (!inputs.KEY_S)
+		if (!inputs.KEY_S && game_start)
 		{
 			inputs.KEY_S = true;
 			p.dir = DIR_DOWN;
+			send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
 		}
 		break;
 	case 'd' | 'D':
-		if (!inputs.KEY_D)
+		if (!inputs.KEY_D && game_start)
 		{
 			inputs.KEY_D = true;
 			p.dir = DIR_RIGHT;
+			send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
 		}
 		break;
+	case 'r' | 'R':
+		if(!game_start && !get_ready)
+		{
+			CTOS_READY r;
+			r.id = myID;
+			r.size = sizeof(r);
+			r.type = ctos_ready;
+			get_ready = true;
+			send(cSocket, reinterpret_cast<char*>(&r), r.size, 0);
+			break;
+		}
 	}
 
-	send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
+	
 }
 
 void KeyUpInput(unsigned char key, int x, int y)
@@ -163,28 +200,28 @@ void KeyUpInput(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w' | 'W':
-		if (inputs.KEY_W)
+		if (inputs.KEY_W && game_start)
 		{
 			inputs.KEY_W = false;
 			p.dir = DIR_UP_UP;
 		}
 		break;
 	case 'a' | 'A':
-		if (inputs.KEY_A)
+		if (inputs.KEY_A && game_start)
 		{
 			inputs.KEY_A = false;
 			p.dir = DIR_LEFT_UP;
 		}
 		break;
 	case 's' | 'S':
-		if (inputs.KEY_S)
+		if (inputs.KEY_S && game_start)
 		{
 			inputs.KEY_S = false;
 			p.dir = DIR_DOWN_UP;
 		}
 		break;
 	case 'd' | 'D':
-		if (inputs.KEY_D)
+		if (inputs.KEY_D && game_start)
 		{
 			inputs.KEY_D = false;
 			p.dir = DIR_RIGHT_UP;
@@ -197,7 +234,7 @@ void KeyUpInput(unsigned char key, int x, int y)
 
 void ProcessMouse(int button, int state, int x, int y)
 {
-	if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN))
+	if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN) && game_start)
 	{
 		CTOS_SHOOT p;
 		p.x = player[myID].GetX();
@@ -213,34 +250,37 @@ void ProcessMouse(int button, int state, int x, int y)
 
 void ProcessMouseMotion(int x, int y)
 {
-	float mx = x;
-	float my = HEIGHT - y;
-	float width = fabs(mx - player[myID].GetX());
-	float height = fabs(my - player[myID].GetY());
-
-	CTOS_ROTATE p;
-	p.id = myID;
-	p.size = sizeof(p);
-	p.type = ctos_rotate;
-
-	if (player[myID].GetX() < mx)
+	if (game_start)
 	{
-		if (player[myID].GetY() < my)
-			radian = atan2(height, width);
-		else
-			radian = atan2(-height, width);
-	}
-	else
-	{
-		if (player[myID].GetY() < my)
-			radian = atan2(height, -width);
-		else
-			radian = atan2(-height, -width);
-	}
-	player[myID].SetRotate(radian * 180 / PI);
+		float mx = x;
+		float my = HEIGHT - y;
+		float width = fabs(mx - player[myID].GetX());
+		float height = fabs(my - player[myID].GetY());
 
-	p.rotate = player[myID].GetRotate();
-	send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
+		CTOS_ROTATE p;
+		p.id = myID;
+		p.size = sizeof(p);
+		p.type = ctos_rotate;
+
+		if (player[myID].GetX() < mx)
+		{
+			if (player[myID].GetY() < my)
+				radian = atan2(height, width);
+			else
+				radian = atan2(-height, width);
+		}
+		else
+		{
+			if (player[myID].GetY() < my)
+				radian = atan2(height, -width);
+			else
+				radian = atan2(-height, -width);
+		}
+		player[myID].SetRotate(radian * 180 / PI);
+
+		p.rotate = player[myID].GetRotate();
+		send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
+	}
 }
 
 void Ready()
@@ -344,7 +384,6 @@ void Lose()
 {
 	float x = 380;
 	float y = 500;
-	glColor3f(0.0f, 0.f, 0.f);
 
 	// L
 	glColor3f(0.9f, 0.1f, 0.1f);
@@ -432,9 +471,15 @@ void display()
 
 	glPushMatrix();
 	map.DrawMap();
-	//Ready();
-	//Lose();
-	//Win();
+
+	if (show_winner && !get_ready)
+	{
+		if(winner_id == myID) Win();
+		else Lose();
+	}
+
+	if (!game_start && get_ready) Ready();
+
 	glPopMatrix();
 
 	glFlush();

@@ -23,6 +23,21 @@ void Player::PlayerInit(SOCKET& sock, int playerID)
 	packet_start_ptr = recvBuf;
 }
 
+void Player::Reset()
+{
+	if (id == 0)
+	{
+		x = starting_point[0];
+		y = starting_point[1];
+	}
+	else
+	{
+		x = starting_point[2];
+		y = starting_point[3];
+	}
+	hp = 100;
+}
+
 void Player::Update(std::chrono::duration<double>& time)
 {
 	x += x_speed * time.count();

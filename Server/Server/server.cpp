@@ -12,8 +12,6 @@
 using namespace std;
 using namespace chrono;
 
-int count1;
-
 int user_id = 0;
 int conn_clients = 0;
 Player clients[2];
@@ -22,6 +20,10 @@ vector<Bullet> bullets;
 mutex b_mx;
 float starting_point[4]{ 300.f, 300.f, 900.f, 300.f };
 chrono::system_clock::time_point prev_time;
+bool winner_check = false;
+bool running = false;
+bool get_ready[2] = { false, false };
+int winner_id = 0;
 
 void error_display(const char* msg, int err_no)
 {
@@ -71,8 +73,6 @@ void CollisionPlayerwithMap(int id)
 
 void CollisionBulletwithPlayer(int id)
 {
-	//int other_id = 1 - id;
-
 	int other_id = 1 - bullets[id].GetID();
 
 	float bullet_x = bullets[id].GetBulletX();
@@ -81,35 +81,18 @@ void CollisionBulletwithPlayer(int id)
 
 	float player_x = clients[other_id].GetX();
 	float player_y = clients[other_id].GetY();
-	//float radius = clients[other_id].GetRadius();
 	float radius = clients[other_id].GetRadius();
 	radius *= radius;
-	//float distance = sqrt(pow((bullet_x) - (player_x + radius), 2) + pow((bullet_y) - (player_y + radius), 2));
 	float distance = (bullet_x - player_x) * (bullet_x - player_x);
 	distance += (bullet_y - player_y) * (bullet_y - player_y);
 
 	if (distance < radius)
 	{
-		std::cout << "Hit" << std::endl;
+		int hp = clients[other_id].GetHP() - 10;
+		clients[other_id].SetHP(hp);
+		if (hp <= 0) winner_check = true;
 		bullets[id].SetActve(false);
 	}
-
-	//if (bullet_x - radian < 0)
-	//{
-	//	return;
-	//}
-	//if (bullet_x + radian > 1200)
-	//{
-	//	return;
-	//}
-	//if (bullet_y - radian < 0)
-	//{
-	//	return;
-	//}
-	//if (bullet_y - radian > 800)
-	//{
-	//	return;
-	//}
 }
 
 void process_packet(int id)
@@ -155,6 +138,28 @@ void process_packet(int id)
 			clients[p->id].SetRotate(p->rotate);
 			break;
 		}
+	case ctos_ready:
+		{
+			CTOS_READY* p = reinterpret_cast<CTOS_READY*> (packet);
+			get_ready[p->id] = true;
+			if (get_ready[0] && get_ready[1])
+			{
+				get_ready[0] = false; 
+				get_ready[1] = false;
+				running = true;
+				if (winner_check)
+				{
+					winner_check = false;
+					for (auto& cl : clients)
+						cl.Reset();
+				}
+				STOC_GAMESTART sp;
+				sp.size = sizeof(sp);
+				sp.type = stoc_gamestart;
+				for (auto& cl : clients)
+					cl.SendPacket(reinterpret_cast<void*> (&sp), sp.size);
+			}
+		}
 	}
 }
 
@@ -162,67 +167,98 @@ void UpdateAndSendThread()
 {
 	while (true)
 	{
-		STOC_WORLD_STATE p;
-		p.type = stoc_world_state;
-
-		auto start_time = system_clock::now();
-		duration<double> frame_time = start_time - prev_time;
-
-		//플레이어 정보 저장
-		for (int i=0;i<2;++i)
+		if (running)
 		{
-			clients[i].Lock();
-			if (clients[i].IsConnected())
+			STOC_WORLD_STATE p;
+			p.type = stoc_world_state;
+
+			auto start_time = system_clock::now();
+			duration<double> frame_time = start_time - prev_time;
+
+			//플레이어 정보 저장
+			for (int i = 0; i < 2; ++i)
 			{
-				clients[i].Update(frame_time);
-				CollisionPlayerwithMap(i);
-				p.clients_state[i].hp = clients[i].GetHP();
-				p.clients_state[i].x = clients[i].GetX();
-				p.clients_state[i].y = clients[i].GetY();
-				p.clients_state[i].is_connected = true;
-				p.clients_state[i].rotate = clients[i].GetRotate();
+				clients[i].Lock();
+				if (clients[i].IsConnected())
+				{
+					clients[i].Update(frame_time);
+					CollisionPlayerwithMap(i);
+					p.clients_state[i].hp = clients[i].GetHP();
+					p.clients_state[i].x = clients[i].GetX();
+					p.clients_state[i].y = clients[i].GetY();
+					p.clients_state[i].is_connected = true;
+					p.clients_state[i].rotate = clients[i].GetRotate();
+				}
+				else
+				{
+					p.clients_state[i].hp = NULL;
+					p.clients_state[i].x = NULL;
+					p.clients_state[i].y = NULL;
+					p.clients_state[i].is_connected = false;
+					p.clients_state[i].rotate = NULL;
+				}
+				clients[i].Unlock();
+			}
+
+			//총알정보 업데이트 및 저장
+			int i = 0;
+			for (auto& b : bullets)
+			{
+				b.Update(frame_time);
+				CollisionBulletwithPlayer(i);
+				p.bullets_state[i].x = b.GetStartX();
+				p.bullets_state[i].y = b.GetStartY();
+				p.bullets_state[i].angle = b.GetAngle();
+				p.bullets_state[i].speed = b.GetSpeed();
+				i += 1;
+			}
+			bullets.erase(remove_if(bullets.begin(),
+				bullets.end(),
+				[](Bullet& b) {return !b.GetActive(); }),
+				bullets.end());
+			p.b_num = bullets.size();
+			p.size = sizeof(p) - (sizeof(BULLET_STATE) * (200 - p.b_num));
+
+			//전송
+			if (!winner_check)
+			{
+				for (auto& cl : clients)
+					cl.SendPacket(reinterpret_cast<void*>(&p), p.size);
+
+				auto end_time = system_clock::now();
+				prev_time = end_time;
+
+				auto elapsed_time = duration_cast<milliseconds>(end_time - start_time);
+
+				this_thread::sleep_for(16ms - elapsed_time);
 			}
 			else
 			{
-				p.clients_state[i].hp = NULL;
-				p.clients_state[i].x = NULL;
-				p.clients_state[i].y = NULL;
-				p.clients_state[i].is_connected = false;
-				p.clients_state[i].rotate = NULL;
+				STOC_GAMEEND p;
+
+				bullets.clear();
+
+				for (auto& cl : clients)
+					if (0 < cl.GetHP()) winner_id += cl.GetID();
+
+				p.size = sizeof(p);
+				p.type = stoc_gameend;
+				p.winner_id = winner_id;
+
+				for (auto& cl : clients)
+					cl.SendPacket(reinterpret_cast<void*>(&p), p.size);
+
+				cout << "Upadate thread stop" << endl;
+				running = false;
 			}
-			clients[i].Unlock();
+
+			//auto end_time = system_clock::now();
+			//prev_time = end_time;
+
+			//auto elapsed_time = duration_cast<milliseconds>(end_time - start_time);
+
+			//this_thread::sleep_for(16ms - elapsed_time);
 		}
-
-		//총알정보 업데이트 및 저장
-		int i = 0;
-		for (auto& b : bullets)
-		{
-			b.Update(frame_time);
-			//CollisionBulletwithPlayer(b.GetID());
-			CollisionBulletwithPlayer(i);
-			p.bullets_state[i].x = b.GetStartX();
-			p.bullets_state[i].y = b.GetStartY();
-			p.bullets_state[i].angle = b.GetAngle();
-			p.bullets_state[i].speed = b.GetSpeed();
-			i += 1;
-		}
-		bullets.erase(remove_if(bullets.begin(),
-								bullets.end(),
-								[](Bullet& b) {return !b.GetActive(); }),
-					  bullets.end());
-		p.b_num = bullets.size();
-		p.size = sizeof(p) - (sizeof(BULLET_STATE) * (200 - p.b_num));
-
-		//전송
-		for (auto& cl : clients)
-			cl.SendPacket(reinterpret_cast<void*>(&p), p.size);
-
-		auto end_time = system_clock::now();
-		prev_time = end_time;
-
-		auto elapsed_time = duration_cast<milliseconds>(end_time - start_time);
-
-		this_thread::sleep_for(16ms - elapsed_time);
 	}
 }
 

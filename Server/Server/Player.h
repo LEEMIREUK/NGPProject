@@ -28,6 +28,7 @@ public:
 	Player() { is_connected = false; x_speed = 0; y_speed = 0; }
 	~Player() { closesocket(stoc_socket); is_connected = false; }
 	void PlayerInit(SOCKET& sock, int playerID);
+	void Reset();
 
 	int GetID() { return id; }
 	int GetHP() { return hp; }

@@ -16,6 +16,7 @@
 #define stoc_world_state	33
 #define stoc_login_ok		34
 #define ctos_rotate			35
+#define stoc_gameend		36
 ///////////////////////////////////////////////////////////////////////////////
 #define DIR_UP			10
 #define DIR_DOWN 		11
@@ -145,6 +146,12 @@ struct STOC_READY {
 struct STOC_GAMESTART {
 	short size;
 	unsigned char type;
+};
+
+struct STOC_GAMEEND {
+	short size;
+	unsigned char type;
+	unsigned char winner_id;
 };
 
 struct STOC_WEAPON_SELECT {
