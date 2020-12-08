@@ -34,10 +34,6 @@ void Bullet::DrawBullet()
 	glVertex2f(size_x, -size_y);
 	glVertex2f(size_x, size_y);
 
-	//glVertex2f(0, 3);
-	//glVertex2f(0, -3);
-	//glVertex2f(15, -3);
-	//glVertex2f(15, 3);
 	glEnd();
 	glPopMatrix();
 }

@@ -48,10 +48,10 @@ public:
 	void SetHP(int playerHP) { hp = playerHP; }
 	void SetX(float xPos) { x = xPos; }
 	void SetY(float yPos) { y = yPos; }
-	void SetXSpeed(float speed) { x_speed += speed; }
-	void SetYSpeed(float speed) { y_speed += speed; }
+	void SetXSpeed(float speed) { mx.lock(); x_speed += speed; mx.unlock(); }
+	void SetYSpeed(float speed) { mx.lock(); y_speed += speed; mx.unlock(); }
 	void SetSize(float playerSize) { size = playerSize; }
-	void SetRotate(float rotate) { m_Rotate = rotate; }
+	void SetRotate(float rotate) { mx.lock(); m_Rotate = rotate; mx.unlock(); }
 	void SetRecvStart(char* new_start_ptr) { recv_start_ptr = new_start_ptr; };
 	void SetPacketStartPtr(char* new_packet_start_ptr) { packet_start_ptr = new_packet_start_ptr; }
 	void ResetPacketStartPtr() { packet_start_ptr = recv_start_ptr; }

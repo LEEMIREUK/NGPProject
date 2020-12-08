@@ -261,13 +261,6 @@ void UpdateAndSendThread()
 				cout << "Upadate thread stop" << endl;
 				running = false;
 			}
-
-			//auto end_time = system_clock::now();
-			//prev_time = end_time;
-
-			//auto elapsed_time = duration_cast<milliseconds>(end_time - start_time);
-
-			//this_thread::sleep_for(16ms - elapsed_time);
 		}
 	}
 }
