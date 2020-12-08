@@ -243,6 +243,145 @@ void ProcessMouseMotion(int x, int y)
 	send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
 }
 
+void Ready()
+{
+	float x = 600;
+	float y = 400;
+	glColor3f(0.6f, 0.8f, 0.5f);
+	// R
+	glRectf(x - 260, y + 100, x - 240, y - 10);
+	glRectf(x - 240, y + 100, x - 200, y + 80);
+	glRectf(x - 200, y + 90, x - 180, y + 50);
+	glRectf(x - 240, y + 60, x - 200, y + 40);
+
+	glRectf(x - 240, y + 50, x - 220, y + 30);
+	glRectf(x - 220, y + 30, x - 200, y + 10);
+	glRectf(x - 200, y + 10, x - 180, y - 10);
+
+	// E
+	glRectf(x - 150, y + 100, x - 130, y - 10);
+	glRectf(x - 130, y + 100, x - 80, y + 80);
+	glRectf(x - 130, y + 55, x - 80, y + 35);
+	glRectf(x - 130, y + 10, x - 80, y - 10);
+
+	// A
+	glRectf(x - 10, y + 100, x + 10, y + 80);
+	glRectf(x - 20, y + 80, x, y + 60);
+	glRectf(x - 30, y + 60, x - 10, y + 40);
+	glRectf(x - 40, y + 40, x - 20, y + 20);
+	glRectf(x - 50, y + 20, x - 30, y - 10);
+	glRectf(x + 20, y + 80, x, y + 60);
+	glRectf(x + 30, y + 60, x + 10, y + 40);
+	glRectf(x + 40, y + 40, x + 20, y + 20);
+	glRectf(x + 50, y + 20, x + 30, y - 10);
+	glRectf(x - 30, y + 40, x + 30, y + 20);
+
+	// D
+	glRectf(x + 80, y + 100, x + 100, y - 10);
+	glRectf(x + 100, y + 100, x + 120, y + 80);
+	glRectf(x + 120, y + 90, x + 140, y + 70);
+	glRectf(x + 130, y + 70, x + 150, y + 20);
+	glRectf(x + 100, y - 10, x + 120, y + 10);
+	glRectf(x + 120, y, x + 140, y + 20);
+
+	// Y
+	glRectf(x + 170, y + 100, x + 190, y + 80);
+	glRectf(x + 180, y + 90, x + 200, y + 70);
+	glRectf(x + 190, y + 80, x + 210, y + 60);
+	glRectf(x + 200, y + 70, x + 220, y + 50);
+	glRectf(x + 250, y + 100, x + 270, y + 80);
+	glRectf(x + 240, y + 90, x + 260, y + 70);
+	glRectf(x + 230, y + 80, x + 250, y + 60);
+	glRectf(x + 220, y + 70, x + 240, y + 50);
+	glRectf(x + 210, y + 60, x + 230, y - 10);
+
+}
+
+void Win()
+{
+	float x = 620;
+	float y = 400;
+	glColor3f(0.1f, 0.1f, 0.9f);
+	// W
+	glRectf(x - 80, y + 100, x - 60, y + 70);
+	glRectf(x - 90, y + 70, x - 70, y + 40);
+	glRectf(x - 100, y + 40, x - 80, y + 10);
+	glRectf(x - 110, y + 10, x - 90, y - 10);
+	glRectf(x - 120, y - 10, x - 100, y + 10);
+	glRectf(x - 130, y + 10, x - 110, y + 40);
+	glRectf(x - 140, y + 70, x - 120, y + 40);
+	glRectf(x - 150, y + 100, x - 130, y + 70);
+
+	glRectf(x - 160, y + 100, x - 140, y + 70);
+	glRectf(x - 170, y + 70, x - 150, y + 40);
+	glRectf(x - 180, y + 40, x - 160, y + 10);
+	glRectf(x - 190, y + 10, x - 170, y - 10);
+	glRectf(x - 200, y - 10, x - 180, y + 10);
+	glRectf(x - 210, y + 10, x - 190, y + 40);
+	glRectf(x - 220, y + 70, x - 200, y + 40);
+	glRectf(x - 230, y + 100, x - 210, y + 70);
+
+	// I
+	glRectf(x - 30, y + 100, x + 30, y + 80);
+	glRectf(x - 10, y + 100, x + 10, y);
+	glRectf(x - 30, y + 10, x + 30, y - 10);
+
+	// N
+	glRectf(x + 60, y + 100, x + 80, y - 10);
+	glRectf(x + 60, y + 100, x + 80, y + 80);
+	glRectf(x + 70, y + 90, x + 90, y + 70);
+	glRectf(x + 80, y + 80, x + 100, y + 60);
+	glRectf(x + 90, y + 70, x + 110, y + 50);
+	glRectf(x + 100, y + 60, x + 120, y + 40);
+	glRectf(x + 110, y + 50, x + 130, y + 30);
+	glRectf(x + 120, y + 40, x + 140, y + 20);
+	glRectf(x + 130, y + 30, x + 150, y + 10);
+	glRectf(x + 140, y + 20, x + 160, y);
+	glRectf(x + 150, y + 100, x + 170, y - 10);
+}
+
+void Lose()
+{
+	float x = 380;
+	float y = 500;
+	glColor3f(0.0f, 0.f, 0.f);
+
+	// L
+	glColor3f(0.9f, 0.1f, 0.1f);
+	glRectf(x + 20, y, x + 40, y - 110);
+	glRectf(x + 20, y - 90, x + 100, y - 110);
+
+	// O
+	glRectf(x + 120, y - 20, x + 140, y - 90);
+	glRectf(x + 130, y - 10, x + 150, y - 30);
+	glRectf(x + 140, y, x + 180, y - 20);
+	glRectf(x + 170, y - 10, x + 190, y - 30);
+	glRectf(x + 180, y - 20, x + 200, y - 90);
+	glRectf(x + 130, y - 80, x + 150, y - 100);
+	glRectf(x + 140, y - 90, x + 180, y - 110);
+	glRectf(x + 170, y - 80, x + 190, y - 100);
+
+	// S
+	glRectf(x + 230, y - 10, x + 250, y - 30);
+	glRectf(x + 240, y, x + 290, y - 20);
+	glRectf(x + 280, y - 10, x + 300, y - 30);
+	glRectf(x + 230, y - 30, x + 250, y - 55);
+	glRectf(x + 240, y - 45, x + 290, y - 65);
+	glRectf(x + 280, y - 55, x + 300, y - 95);
+	glRectf(x + 230, y - 80, x + 250, y - 100);
+	glRectf(x + 240, y - 90, x + 290, y - 110);
+	glRectf(x + 280, y - 80, x + 300, y - 100);
+
+	// E
+	glRectf(x + 330, y, x + 350, y - 110);
+	glRectf(x + 330, y, x + 400, y - 20);
+	glRectf(x + 330, y - 45, x + 400, y - 65);
+	glRectf(x + 330, y - 90, x + 400, y - 110);
+
+	glEnd();
+}
+
+
 void display()
 { 
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
@@ -293,6 +432,9 @@ void display()
 
 	glPushMatrix();
 	map.DrawMap();
+	//Ready();
+	//Lose();
+	//Win();
 	glPopMatrix();
 
 	glFlush();
@@ -311,7 +453,7 @@ void InitOpenGL(int argc, char** argv)
 	cSocket = socket(AF_INET, SOCK_STREAM, 0);
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = htons(SERVER_PORT);
-	sockAddr.sin_addr.s_addr = inet_addr(ip.c_str());
+	sockAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	int conn_result = connect(cSocket, (SOCKADDR*)&sockAddr, sizeof(sockAddr));
 
 	if (conn_result == 0)
@@ -355,12 +497,12 @@ void InitOpenGL(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-	// 立加
-	std::cout << "******************************" << std::endl;
-	std::cout << "         Shooting Nemo        " << std::endl;
-	std::cout << "******************************" << std::endl;
-	std::cout << "Server IP 林家甫 涝仿秦 林技夸: ";
-	std::cin >> ip;
+	//// 立加
+	//std::cout << "******************************" << std::endl;
+	//std::cout << "         Shooting Nemo        " << std::endl;
+	//std::cout << "******************************" << std::endl;
+	//std::cout << "Server IP 林家甫 涝仿秦 林技夸: ";
+	//std::cin >> ip;
 
 
 	std::wcout.imbue(std::locale("korean"));
