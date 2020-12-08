@@ -28,10 +28,16 @@ void Bullet::DrawBullet()
 	glTranslatef(bulletSpeed + 50, 0, 0);
 	glColor3f(1.f, 0.f, 0.f);
 	glBegin(GL_QUADS);
-	glVertex2f(0, 3);
-	glVertex2f(0, -3);
-	glVertex2f(15, -3);
-	glVertex2f(15, 3);
+
+	glVertex2f(0, size_y);
+	glVertex2f(0, -size_y);
+	glVertex2f(size_x, -size_y);
+	glVertex2f(size_x, size_y);
+
+	//glVertex2f(0, 3);
+	//glVertex2f(0, -3);
+	//glVertex2f(15, -3);
+	//glVertex2f(15, 3);
 	glEnd();
 	glPopMatrix();
 }

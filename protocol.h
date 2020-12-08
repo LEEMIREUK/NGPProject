@@ -35,6 +35,11 @@
 #define PLAYER_X_SPEED 300.f
 #define PLAYER_Y_SPEED 300.f
 #define BULLET_SPEED 500.f
+#define STRONG_BULLET_SPEED 350.f
+#define BULLET_SIZE_X 15.f
+#define BULLET_SIZE_Y 3.f
+#define STRONG_BULLET_SIZE_X 30.f
+#define STRONG_BULLET_SIZE_Y 6.f
 #define PLAYER_SIZE 25.f
 ///////////////////////////////////////////////////////////////////////////////
 #pragma pack(push, 1)
@@ -51,6 +56,8 @@ struct CLIENT_STATE {
 struct BULLET_STATE {
 	float x;
 	float y;
+	float size_x;
+	float size_y;
 	float angle;
 	float speed;
 };
@@ -66,6 +73,7 @@ struct CTOS_SHOOT {
 	short size;
 	unsigned char type;
 	unsigned char id;
+	unsigned char w_type;
 	float x;
 	float y;
 	float angle;

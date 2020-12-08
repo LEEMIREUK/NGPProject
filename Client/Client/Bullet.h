@@ -16,10 +16,13 @@ public:
 	void SetShootAngle(float rotateAngle);
 	void SetRadian(float rotateradian);
 	void SetShootSpeed(float speed) { bulletSpeed = speed; }
+	void SetSizeX(float size) { size_x = size; }
+	void SetSizeY(float size) { size_y = size; }
 private:
 	float bulletSpeed;
 	float startX, startY;
 	float bulletX, bulletY;
+	float size_x, size_y;
 	bool shoot;
 	float angle;
 	float radian;

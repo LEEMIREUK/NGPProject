@@ -88,7 +88,7 @@ void CollisionBulletwithPlayer(int id)
 
 	if (distance < radius)
 	{
-		int hp = clients[other_id].GetHP() - 10;
+		int hp = clients[other_id].GetHP() - bullets[id].GetDamage();
 		clients[other_id].SetHP(hp);
 		if (hp <= 0) winner_check = true;
 		bullets[id].SetActve(false);
@@ -128,7 +128,7 @@ void process_packet(int id)
 		{
 			CTOS_SHOOT* p = reinterpret_cast<CTOS_SHOOT*> (packet);
 			b_mx.lock();
-			bullets.emplace_back(p->x, p->y, p->angle, p->radian, p->id);
+			bullets.emplace_back(p->x, p->y, p->angle, p->radian, p->id, p->w_type);
 			b_mx.unlock();
 			break;
 		}
@@ -210,6 +210,16 @@ void UpdateAndSendThread()
 				p.bullets_state[i].y = b.GetStartY();
 				p.bullets_state[i].angle = b.GetAngle();
 				p.bullets_state[i].speed = b.GetSpeed();
+				if (b.GetType() == 1)
+				{
+					p.bullets_state[i].size_x = STRONG_BULLET_SIZE_X;
+					p.bullets_state[i].size_y = STRONG_BULLET_SIZE_Y;
+				}
+				else
+				{
+					p.bullets_state[i].size_x = BULLET_SIZE_X;
+					p.bullets_state[i].size_y = BULLET_SIZE_Y;
+				}
 				i += 1;
 			}
 			bullets.erase(remove_if(bullets.begin(),

@@ -21,6 +21,7 @@ int shootcount = 0;
 float radian = 0;
 char recvBuffer[MAX_BUFFER];
 int myID;
+int myWeapon;
 bool show_winner = false;
 bool get_ready = false;
 bool game_start = false;
@@ -73,6 +74,8 @@ void process_packet(char* packet)
 				bullets[i].SetPos(p->bullets_state[i].x, p->bullets_state[i].y);
 				bullets[i].SetShootAngle(p->bullets_state[i].angle);
 				bullets[i].SetShootSpeed(p->bullets_state[i].speed);
+				bullets[i].SetSizeX(p->bullets_state[i].size_x);
+				bullets[i].SetSizeY(p->bullets_state[i].size_y);
 			}
 			for (int i = 0; i < 2; ++i)
 			{
@@ -242,6 +245,7 @@ void ProcessMouse(int button, int state, int x, int y)
 		p.radian = radian;
 		p.angle = player[myID].GetRotate();
 		p.id = myID;
+		p.w_type = myWeapon;
 		p.size = sizeof(p);
 		p.type = ctos_shoot;
 		send(cSocket, reinterpret_cast<char*>(&p), p.size, 0);
@@ -498,7 +502,7 @@ void InitOpenGL(int argc, char** argv)
 	cSocket = socket(AF_INET, SOCK_STREAM, 0);
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = htons(SERVER_PORT);
-	sockAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	sockAddr.sin_addr.s_addr = inet_addr(ip.c_str());
 	int conn_result = connect(cSocket, (SOCKADDR*)&sockAddr, sizeof(sockAddr));
 
 	if (conn_result == 0)
@@ -542,12 +546,14 @@ void InitOpenGL(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-	//// 접속
-	//std::cout << "******************************" << std::endl;
-	//std::cout << "         Shooting Nemo        " << std::endl;
-	//std::cout << "******************************" << std::endl;
-	//std::cout << "Server IP 주소를 입력해 주세요: ";
-	//std::cin >> ip;
+	// 접속
+	std::cout << "******************************" << std::endl;
+	std::cout << "         Shooting Nemo        " << std::endl;
+	std::cout << "******************************" << std::endl;
+	std::cout << "사용할 무기의 종류를 선택해 주세요(1 - 강하지만 느린 무기, 2 - 약하지만 빠른 무기): ";
+	std::cin >> myWeapon;
+	std::cout << "Server IP 주소를 입력해 주세요: ";
+	std::cin >> ip;
 
 
 	std::wcout.imbue(std::locale("korean"));
