@@ -71,7 +71,9 @@ void CollisionPlayerwithMap(int id)
 
 void CollisionBulletwithPlayer(int id)
 {
-	int other_id = 1 - id;
+	//int other_id = 1 - id;
+
+	int other_id = 1 - bullets[id].GetID();
 
 	float bullet_x = bullets[id].GetBulletX();
 	float bullet_y = bullets[id].GetBulletY();
@@ -79,18 +81,18 @@ void CollisionBulletwithPlayer(int id)
 
 	float player_x = clients[other_id].GetX();
 	float player_y = clients[other_id].GetY();
+	//float radius = clients[other_id].GetRadius();
 	float radius = clients[other_id].GetRadius();
+	radius *= radius;
+	//float distance = sqrt(pow((bullet_x) - (player_x + radius), 2) + pow((bullet_y) - (player_y + radius), 2));
+	float distance = (bullet_x - player_x) * (bullet_x - player_x);
+	distance += (bullet_y - player_y) * (bullet_y - player_y);
 
-	float distance = sqrt(pow((bullet_x) - (player_x + radius), 2) + pow((bullet_y) - (player_y + radius), 2));
-
-
-	//if (distance < radius)
-	//{
-	//	std::cout << count1 << std::endl;
-	//	count1++;
-	//}
-
-	std::cout << bullet_x << " -- " << bullet_y << std::endl;
+	if (distance < radius)
+	{
+		std::cout << "Hit" << std::endl;
+		bullets[id].SetActve(false);
+	}
 
 	//if (bullet_x - radian < 0)
 	//{
@@ -196,7 +198,8 @@ void UpdateAndSendThread()
 		for (auto& b : bullets)
 		{
 			b.Update(frame_time);
-			CollisionBulletwithPlayer(b.GetID());
+			//CollisionBulletwithPlayer(b.GetID());
+			CollisionBulletwithPlayer(i);
 			p.bullets_state[i].x = b.GetStartX();
 			p.bullets_state[i].y = b.GetStartY();
 			p.bullets_state[i].angle = b.GetAngle();
@@ -240,8 +243,6 @@ void RecvThread(int id)
 				conn_clients -= 1;
 				return;
 			}
-			//string error_str = "Player" + to_string(id) + "recv error";
-			//error_display(error_str.c_str(), WSAGetLastError());
 		}
 		else
 		{

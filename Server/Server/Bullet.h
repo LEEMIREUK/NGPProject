@@ -43,6 +43,7 @@ public:
 	void SetBulletY(float new_y) { bullet_y = new_y; }
 	void SetID(float new_id) { id = new_id; }
 	void SetRotate(float rad) { radian = rad; }
+	void SetActve(bool value) { active = value; }
 
 	void Update(std::chrono::duration<double>& time);
 };
