@@ -2,7 +2,6 @@
 
 Weapon::Weapon()
 {
-	bulletSpeed = 0;
 }
 
 Weapon::~Weapon()

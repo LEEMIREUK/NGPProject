@@ -26,6 +26,5 @@ private:
 	bool shoot;
 	float angle;
 	float radian;
-	Player player;
 };
 

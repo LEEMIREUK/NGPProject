@@ -32,6 +32,5 @@ private:
 	float m_Speed_Y;
 	int	  m_PlayerID;
 	bool  m_connected;
-
 	float m_Rotate;
 };

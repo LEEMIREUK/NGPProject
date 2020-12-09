@@ -524,9 +524,6 @@ void InitOpenGL(int argc, char** argv)
 		glutKeyboardFunc(KeyDownInput);
 		glutKeyboardUpFunc(KeyUpInput);
 
-		////Init inputs
-		//memset(&inputs, 0, sizeof(Inputs));
-
 		// 마우스 처리
 		glutMouseFunc(ProcessMouse);
 		glutPassiveMotionFunc(ProcessMouseMotion);
