@@ -36,6 +36,8 @@ void Player::Reset()
 		y = starting_point[3];
 	}
 	hp = 100;
+	x_speed = 0.f;
+	y_speed = 0.f;
 }
 
 void Player::Update(std::chrono::duration<double>& time)

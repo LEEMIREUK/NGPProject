@@ -249,7 +249,7 @@ void UpdateAndSendThread()
 				bullets.clear();
 
 				for (auto& cl : clients)
-					if (0 < cl.GetHP()) winner_id += cl.GetID();
+					if (0 < cl.GetHP()) winner_id = cl.GetID();
 
 				p.size = sizeof(p);
 				p.type = stoc_gameend;
