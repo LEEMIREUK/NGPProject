@@ -424,8 +424,6 @@ void Lose()
 	glRectf(x + 330, y, x + 400, y - 20);
 	glRectf(x + 330, y - 45, x + 400, y - 65);
 	glRectf(x + 330, y - 90, x + 400, y - 110);
-
-	glEnd();
 }
 
 
