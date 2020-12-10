@@ -426,7 +426,6 @@ void Lose()
 	glRectf(x + 330, y - 90, x + 400, y - 110);
 }
 
-
 void display()
 { 
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
