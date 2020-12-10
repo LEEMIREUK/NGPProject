@@ -222,11 +222,13 @@ void UpdateAndSendThread()
 				}
 				i += 1;
 			}
+			b_mx.lock();
 			bullets.erase(remove_if(bullets.begin(),
 				bullets.end(),
 				[](Bullet& b) {return !b.GetActive(); }),
 				bullets.end());
 			p.b_num = bullets.size();
+			b_mx.unlock();
 			p.size = sizeof(p) - (sizeof(BULLET_STATE) * (200 - p.b_num));
 
 			//Àü¼Û
