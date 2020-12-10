@@ -103,6 +103,10 @@ void process_packet(char* packet)
 			game_start = true;
 			get_ready = false;
 			show_winner = false;
+			inputs.KEY_A = false;
+			inputs.KEY_S = false;
+			inputs.KEY_D = false;
+			inputs.KEY_W = false;
 			break;
 		}
 	}

@@ -260,7 +260,6 @@ void UpdateAndSendThread()
 				for (auto& cl : clients)
 					cl.SendPacket(reinterpret_cast<void*>(&p), p.size);
 
-				cout << "Upadate thread stop" << endl;
 				running = false;
 			}
 		}
@@ -343,59 +342,56 @@ int main()
 	int addrSize = sizeof(stoc_sockAddr);
 
 	//accept처리
-	while (true)
+	while (conn_clients < 2)
 	{
-		if (conn_clients < 2)
+		auto stoc_socket = accept(lSocket, (SOCKADDR*)&stoc_sockAddr, &addrSize);
+		clients[user_id].PlayerInit(stoc_socket, user_id);
+		recv_thread[user_id] = thread{ RecvThread, user_id };
+
+		//접속한 클라이언트의 정보를 패킷에 저장한다.
+		STOC_LOGIN_OK p;
+		p.type = stoc_login_ok;
+		p.size = sizeof(p);
+		p.id = clients[user_id].GetID();
+		p.x = clients[user_id].GetX();
+		p.y = clients[user_id].GetY();
+		p.player_size = clients[user_id].GetSize();
+
+		//접속한 클라이언트 정보를 모든 클라이언트에게 전송한다.
+		for (auto& cl : clients)
 		{
-			auto stoc_socket = accept(lSocket, (SOCKADDR*)&stoc_sockAddr, &addrSize);
-			clients[user_id].PlayerInit(stoc_socket, user_id);
-			recv_thread[user_id] = thread{ RecvThread, user_id };
-
-			//접속한 클라이언트의 정보를 패킷에 저장한다.
-			STOC_LOGIN_OK p;
-			p.type = stoc_login_ok;
-			p.size = sizeof(p);
-			p.id = clients[user_id].GetID();
-			p.x = clients[user_id].GetX();
-			p.y = clients[user_id].GetY();
-			p.player_size = clients[user_id].GetSize();
-
-			//접속한 클라이언트 정보를 모든 클라이언트에게 전송한다.
-			for (auto& cl : clients)
+			int id = cl.GetID();
+			if (id == user_id)
 			{
-				int id = cl.GetID();
-				if (id == user_id)
+				cl.SendPacket(reinterpret_cast<void*>(&p), sizeof(p));
+				//이미 접속중인 클라이언트가 있으면 해당 클라이언트 정보를 전송한다.
+				int other_id = 1 - id;
+				if (clients[other_id].IsConnected())
 				{
-					cl.SendPacket(reinterpret_cast<void*>(&p), sizeof(p));
-					//이미 접속중인 클라이언트가 있으면 해당 클라이언트 정보를 전송한다.
-					int other_id = 1 - id;
-					if (clients[other_id].IsConnected())
-					{
-						STOC_NEW_CLIENT other_cl;
-						other_cl.id = other_id;
-						other_cl.x = clients[other_id].GetX();
-						other_cl.y = clients[other_id].GetY();
-						other_cl.size = sizeof(other_cl);
-						other_cl.player_size = clients[other_id].GetSize();
-						other_cl.type = stoc_new_client;
-						cl.SendPacket(reinterpret_cast<void*>(&other_cl), sizeof(other_cl));
-					}
-				}
-				else
-				{
-					STOC_NEW_CLIENT new_user;
-					new_user.id = user_id;
-					new_user.x = clients[user_id].GetX();
-					new_user.y = clients[user_id].GetY();
-					new_user.size = sizeof(new_user);
-					new_user.player_size = clients[user_id].GetSize();
-					new_user.type = stoc_new_client;
-					cl.SendPacket(reinterpret_cast<void*>(&new_user), sizeof(new_user));
+					STOC_NEW_CLIENT other_cl;
+					other_cl.id = other_id;
+					other_cl.x = clients[other_id].GetX();
+					other_cl.y = clients[other_id].GetY();
+					other_cl.size = sizeof(other_cl);
+					other_cl.player_size = clients[other_id].GetSize();
+					other_cl.type = stoc_new_client;
+					cl.SendPacket(reinterpret_cast<void*>(&other_cl), sizeof(other_cl));
 				}
 			}
-			user_id = (user_id + 1) % 2;
-			++conn_clients;
+			else
+			{
+				STOC_NEW_CLIENT new_user;
+				new_user.id = user_id;
+				new_user.x = clients[user_id].GetX();
+				new_user.y = clients[user_id].GetY();
+				new_user.size = sizeof(new_user);
+				new_user.player_size = clients[user_id].GetSize();
+				new_user.type = stoc_new_client;
+				cl.SendPacket(reinterpret_cast<void*>(&new_user), sizeof(new_user));
+			}
 		}
+		user_id += 1;
+		conn_clients += 1;
 	}
 
 	//다른 스레드가 종료될 때 까지 기다린다.
